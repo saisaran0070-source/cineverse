@@ -886,9 +886,7 @@ button {
 }
 
 .player-modal.active {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: block;
 }
 
 @keyframes modalFadeIn {
@@ -897,7 +895,7 @@ button {
 }
 
 .player-container {
-    margin: auto;
+    margin: 40px auto;
     width: 100%;
     max-width: 1200px;
     background: var(--bg-secondary);
@@ -1119,14 +1117,12 @@ button {
 }
 
 .detail-modal.active {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: block;
 }
 
 .detail-container {
     position: relative;
-    margin: auto;
+    margin: 40px auto;
     width: 100%;
     max-width: 900px;
     background: var(--bg-secondary);
