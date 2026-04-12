@@ -252,6 +252,8 @@ $('#signupFormElement').addEventListener('submit', function (e) {
             } else if (error.code === 'auth/weak-password') {
                 msg = 'Password is too weak';
                 showFieldError('#signupPasswordGroup', '#signupPasswordError', 'Password is too weak');
+            } else {
+                msg = `Error: ${error.code} - ${error.message}`;
             }
             showLoginToast(msg, 'error');
         });
@@ -268,7 +270,7 @@ $$('.social-btn').forEach(btn => {
                 })
                 .catch((error) => {
                     console.error("Google Auth Error:", error);
-                    showLoginToast('Google Login failed or was cancelled.', 'error');
+                    showLoginToast(`Google Error: ${error.code} - ${error.message}`, 'error');
                 });
         } else {
             const tempProvider = btn.classList.contains('github') ? 'GitHub' : 'Twitter';
