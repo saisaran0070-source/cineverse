@@ -735,16 +735,23 @@ function setupNavigation() {
         document.body.style.overflow = '';
     });
 
-    $$('.server-btn').forEach((btn, i) => {
+    $$('.server-btn:not(#externalPlayBtn)').forEach((btn, i) => {
         btn.addEventListener('click', () => {
             if (currentMovieId) {
-                $$('.server-btn').forEach(b => b.classList.remove('active'));
+                $$('.server-btn:not(#externalPlayBtn)').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentServer = i;
                 loadMovieStream(currentMovieId, i);
                 showToast(`Switched to Server ${i + 1}`);
             }
         });
+    });
+
+    $('#externalPlayBtn').addEventListener('click', () => {
+        if (currentMovieId) {
+            const url = CONFIG.EMBED_SERVERS[currentServer](currentMovieId);
+            window.open(url, '_blank');
+        }
     });
 
     $('#subtitleToggle').addEventListener('click', function () {
