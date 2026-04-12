@@ -2,7 +2,7 @@
    CineVerse — Login Page Logic
    Firebase Authentication
    ============================================ */
-import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from './firebase.js';
+import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile, provider, signInWithPopup } from './firebase.js';
 
 // === DOM Helpers ===
 const $ = (sel) => document.querySelector(sel);
@@ -257,12 +257,23 @@ $('#signupFormElement').addEventListener('submit', function (e) {
         });
 });
 
-// === Social Login (Demo) ===
+// === Social Login ===
 $$('.social-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-        const provider = btn.classList.contains('google') ? 'Google' :
-                         btn.classList.contains('github') ? 'GitHub' : 'Twitter';
-        showLoginToast(`${provider} login coming soon!`, 'info');
+        if (btn.classList.contains('google')) {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    showLoginToast('Google Login successful!', 'success');
+                    // Auth observer will redirect
+                })
+                .catch((error) => {
+                    console.error("Google Auth Error:", error);
+                    showLoginToast('Google Login failed or was cancelled.', 'error');
+                });
+        } else {
+            const tempProvider = btn.classList.contains('github') ? 'GitHub' : 'Twitter';
+            showLoginToast(`${tempProvider} login coming soon!`, 'info');
+        }
     });
 });
 
