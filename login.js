@@ -1,19 +1,19 @@
 /* ============================================
    CineVerse — Login Page Logic
-   localStorage-based auth for demo purposes
+   Firebase Authentication
    ============================================ */
+import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from './firebase.js';
 
 // === DOM Helpers ===
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
 // === Check if already logged in ===
-(function checkAuth() {
-    const user = JSON.parse(localStorage.getItem('cineverse_user') || 'null');
+onAuthStateChanged(auth, (user) => {
     if (user) {
         window.location.href = 'index.html';
     }
-})();
+});
 
 // === Floating Posters Background ===
 function createFloatingPosters() {
@@ -163,41 +163,21 @@ $('#loginFormElement').addEventListener('submit', function (e) {
     btn.classList.add('loading');
     btn.disabled = true;
 
-    // Simulate login delay
-    setTimeout(() => {
-        // Check localStorage for registered users
-        const users = JSON.parse(localStorage.getItem('cineverse_users') || '[]');
-        const user = users.find(u => u.email === email && u.password === password);
-
-        if (user) {
-            // Successful login
-            localStorage.setItem('cineverse_user', JSON.stringify({
-                name: user.name,
-                email: user.email,
-                avatar: user.name.charAt(0).toUpperCase(),
-                loginTime: Date.now()
-            }));
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
             showLoginToast('Login successful! Redirecting...', 'success');
-            setTimeout(() => window.location.href = 'index.html', 1200);
-        } else if (users.length === 0) {
-            // No users registered — allow demo login with any credentials
-            localStorage.setItem('cineverse_user', JSON.stringify({
-                name: email.split('@')[0],
-                email: email,
-                avatar: email.charAt(0).toUpperCase(),
-                loginTime: Date.now()
-            }));
-            showLoginToast('Welcome to CineVerse!', 'success');
-            setTimeout(() => window.location.href = 'index.html', 1200);
-        } else {
-            showLoginToast('Invalid email or password', 'error');
-            showFieldError('#loginEmailGroup', '#loginEmailError', 'Check your email');
-            showFieldError('#loginPasswordGroup', '#loginPasswordError', 'Check your password');
-        }
-
-        btn.classList.remove('loading');
-        btn.disabled = false;
-    }, 1500);
+            // Auth observer will handle the redirect
+        })
+        .catch((error) => {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+            let msg = 'Invalid email or password';
+            if (error.code === 'auth/user-not-found') msg = 'No account found with this email';
+            if (error.code === 'auth/wrong-password') msg = 'Incorrect password';
+            if (error.code === 'auth/invalid-credential') msg = 'Invalid email or password';
+            showLoginToast(msg, 'error');
+            showFieldError('#loginPasswordGroup', '#loginPasswordError', msg);
+        });
 });
 
 // === Signup Handler ===
@@ -252,35 +232,29 @@ $('#signupFormElement').addEventListener('submit', function (e) {
     btn.classList.add('loading');
     btn.disabled = true;
 
-    setTimeout(() => {
-        // Check if email already exists
-        const users = JSON.parse(localStorage.getItem('cineverse_users') || '[]');
-        if (users.find(u => u.email === email)) {
-            showLoginToast('Email already registered. Please sign in.', 'error');
-            showFieldError('#signupEmailGroup', '#signupEmailError', 'Email already in use');
+    createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            // Update profile with name
+            updateProfile(userCredential.user, {
+                displayName: name
+            }).then(() => {
+                showLoginToast('Account created successfully!', 'success');
+                // Auth observer will redirect
+            });
+        })
+        .catch((error) => {
             btn.classList.remove('loading');
             btn.disabled = false;
-            return;
-        }
-
-        // Register user
-        users.push({ name, email, password });
-        localStorage.setItem('cineverse_users', JSON.stringify(users));
-
-        // Auto login
-        localStorage.setItem('cineverse_user', JSON.stringify({
-            name,
-            email,
-            avatar: name.charAt(0).toUpperCase(),
-            loginTime: Date.now()
-        }));
-
-        showLoginToast('Account created successfully!', 'success');
-        setTimeout(() => window.location.href = 'index.html', 1200);
-
-        btn.classList.remove('loading');
-        btn.disabled = false;
-    }, 1500);
+            let msg = 'Failed to create account';
+            if (error.code === 'auth/email-already-in-use') {
+                msg = 'Email already registered. Please sign in.';
+                showFieldError('#signupEmailGroup', '#signupEmailError', 'Email already in use');
+            } else if (error.code === 'auth/weak-password') {
+                msg = 'Password is too weak';
+                showFieldError('#signupPasswordGroup', '#signupPasswordError', 'Password is too weak');
+            }
+            showLoginToast(msg, 'error');
+        });
 });
 
 // === Social Login (Demo) ===

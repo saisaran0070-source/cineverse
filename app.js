@@ -1,8 +1,8 @@
 /* ============================================
    CineVerse — App Logic
    TMDB API + Embedded Movie Player
-   With fallback sample data for demo mode
    ============================================ */
+import { auth, onAuthStateChanged, signOut } from './firebase.js';
 
 const CONFIG = {
     // Replace with your own TMDB API key from https://www.themoviedb.org/settings/api
@@ -859,52 +859,57 @@ async function init() {
 
 // === User Menu (Auth) ===
 function setupUserMenu() {
-    const user = JSON.parse(localStorage.getItem('cineverse_user') || 'null');
     const loginBtn = $('#loginNavBtn');
     const userProfile = $('#userProfile');
     const userAvatarBtn = $('#userAvatarBtn');
     const userDropdown = $('#userDropdown');
 
-    if (user) {
-        // Logged in — show avatar, hide login button
-        if (loginBtn) loginBtn.style.display = 'none';
-        if (userProfile) {
-            userProfile.style.display = 'block';
-            $('#userAvatar').textContent = user.avatar || user.name?.charAt(0)?.toUpperCase() || 'U';
-            $('#dropdownAvatar').textContent = user.avatar || user.name?.charAt(0)?.toUpperCase() || 'U';
-            $('#dropdownName').textContent = user.name || 'User';
-            $('#dropdownEmail').textContent = user.email || '';
-        }
-
-        // Toggle dropdown
-        if (userAvatarBtn) {
-            userAvatarBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                userDropdown.classList.toggle('active');
-            });
-        }
-
-        // Close dropdown on outside click
-        document.addEventListener('click', (e) => {
-            if (userDropdown && !userDropdown.contains(e.target) && !userAvatarBtn.contains(e.target)) {
-                userDropdown.classList.remove('active');
-            }
+    // Toggle dropdown
+    if (userAvatarBtn) {
+        userAvatarBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('active');
         });
+    }
 
-        // Logout
-        const logoutBtn = $('#logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                localStorage.removeItem('cineverse_user');
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+        if (userDropdown && !userDropdown.contains(e.target) && !userAvatarBtn.contains(e.target)) {
+            userDropdown.classList.remove('active');
+        }
+    });
+
+    // Logout
+    const logoutBtn = $('#logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth).then(() => {
                 showToast('Logged out successfully');
                 setTimeout(() => window.location.reload(), 800);
             });
-        }
-    } else {
-        // Not logged in — show login button, hide profile
-        if (loginBtn) loginBtn.style.display = 'flex';
-        if (userProfile) userProfile.style.display = 'none';
+        });
     }
+
+    // Firebase Auth Observer
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Logged in — show avatar, hide login button
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (userProfile) {
+                userProfile.style.display = 'block';
+                const nameStr = user.displayName || user.email?.split('@')[0] || 'User';
+                const init = nameStr.charAt(0).toUpperCase();
+                $('#userAvatar').textContent = init;
+                $('#dropdownAvatar').textContent = init;
+                $('#dropdownName').textContent = nameStr;
+                $('#dropdownEmail').textContent = user.email || '';
+            }
+        } else {
+            // Not logged in — show login button, hide profile
+            if (loginBtn) loginBtn.style.display = 'flex';
+            if (userProfile) userProfile.style.display = 'none';
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', init);
