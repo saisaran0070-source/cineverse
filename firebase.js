@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebas
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyALmLhAhPwKgZiTeGWeZiE9MsyrwOc8XIg",
+    apiKey: "AIzaSyAlMLhAhPwKgZiTeGWeZiE9MsyrwOc8XIg",
     authDomain: "cineverse-d4485.firebaseapp.com",
     projectId: "cineverse-d4485",
     storageBucket: "cineverse-d4485.firebasestorage.app",
