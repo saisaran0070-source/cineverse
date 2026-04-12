@@ -880,13 +880,15 @@ button {
     z-index: 9999;
     background: rgba(0, 0, 0, 0.95);
     display: none;
-    align-items: center;
-    justify-content: center;
+    overflow-y: auto;
+    padding: 40px 20px;
     animation: modalFadeIn 0.4s ease;
 }
 
 .player-modal.active {
     display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 @keyframes modalFadeIn {
@@ -895,7 +897,8 @@ button {
 }
 
 .player-container {
-    width: 95%;
+    margin: auto;
+    width: 100%;
     max-width: 1200px;
     background: var(--bg-secondary);
     border-radius: 20px;
@@ -1111,18 +1114,19 @@ button {
     z-index: 5000;
     background: rgba(0, 0, 0, 0.9);
     display: none;
-    align-items: center;
-    justify-content: center;
     overflow-y: auto;
     padding: 40px 20px;
 }
 
 .detail-modal.active {
     display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .detail-container {
     position: relative;
+    margin: auto;
     width: 100%;
     max-width: 900px;
     background: var(--bg-secondary);
