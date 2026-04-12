@@ -541,6 +541,73 @@ async function showMovieDetail(movie) {
 
 // === Movie Player ===
 function openPlayer(movieId, title, year) {
+    // Show ad-blocker tip (only once)
+    const adTipShown = localStorage.getItem('cineverse_adtip');
+    if (!adTipShown) {
+        showAdBlockerTip(() => {
+            localStorage.setItem('cineverse_adtip', 'true');
+            launchPlayer(movieId, title, year);
+        });
+    } else {
+        launchPlayer(movieId, title, year);
+    }
+}
+
+function showAdBlockerTip(onContinue) {
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'adTipOverlay';
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10000;
+        background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+        display: flex; align-items: center; justify-content: center;
+        animation: fadeIn 0.3s ease;
+    `;
+    overlay.innerHTML = `
+        <div style="
+            background: rgba(18,18,42,0.95); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 32px; max-width: 420px; width: 90%;
+            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        ">
+            <div style="font-size: 2.5rem; margin-bottom: 12px;">🛡️</div>
+            <h3 style="font-family: 'Outfit',sans-serif; font-size: 1.3rem; margin-bottom: 8px; color: #fff;">
+                Ad Blocker Recommended
+            </h3>
+            <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px;">
+                The video player may show ads from third-party servers.
+                For the best experience, install <strong style="color: #00f5d4;">uBlock Origin</strong> extension in your browser.
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <a href="https://chrome.google.com/webstore/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm"
+                   target="_blank" style="
+                    padding: 10px 20px; border-radius: 10px; font-size: 0.85rem; font-weight: 600;
+                    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+                    color: #00f5d4; text-decoration: none; transition: all 0.3s;
+                ">
+                    <i class="fab fa-chrome" style="margin-right: 6px;"></i>Get uBlock
+                </a>
+                <button id="adTipContinue" style="
+                    padding: 10px 24px; border-radius: 10px; font-size: 0.85rem; font-weight: 600;
+                    background: linear-gradient(135deg, #ff3cac, #784ba0); border: none;
+                    color: white; cursor: pointer; transition: all 0.3s;
+                ">
+                    Continue to Movie ▶
+                </button>
+            </div>
+            <p style="color: rgba(255,255,255,0.3); font-size: 0.75rem; margin-top: 14px;">
+                This message won't appear again
+            </p>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.querySelector('#adTipContinue').addEventListener('click', () => {
+        overlay.remove();
+        onContinue();
+    });
+}
+
+function launchPlayer(movieId, title, year) {
     currentMovieId = movieId;
     currentServer = 0;
 
