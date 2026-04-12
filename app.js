@@ -10,11 +10,11 @@ const CONFIG = {
     TMDB_BASE: 'https://api.themoviedb.org/3',
     IMG_BASE: 'https://image.tmdb.org/t/p',
     EMBED_SERVERS: [
-        (id) => `https://embed.su/embed/movie/${id}`,
-        (id) => `https://vidsrc.pro/embed/movie/${id}`,
-        (id) => `https://multiembed.mov/?video_id=${id}&tmdb=1`,
-        (id) => `https://superembed.stream/?video_id=${id}&tmdb=1`,
+        (id) => `https://vidsrc.net/embed/movie?tmdb=${id}`,
         (id) => `https://vidsrc.to/embed/movie/${id}`,
+        (id) => `https://vidsrc.xyz/embed/movie?tmdb=${id}`,
+        (id) => `https://vidsrc.cc/v2/embed/movie/${id}`,
+        (id) => `https://autoembed.co/movie/tmdb/${id}`,
     ]
 };
 
