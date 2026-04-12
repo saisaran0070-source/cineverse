@@ -1,0 +1,689 @@
+/* ============================================
+   CineVerse — Login Page Styles
+   Premium glassmorphism design
+   ============================================ */
+
+/* === Reset & Base === */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-primary: #0a0a1a;
+    --bg-secondary: #12122a;
+    --bg-card: rgba(18, 18, 42, 0.75);
+    --bg-input: rgba(255, 255, 255, 0.06);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-focus: rgba(0, 245, 212, 0.5);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-muted: rgba(255, 255, 255, 0.4);
+    --accent-primary: #00f5d4;
+    --accent-secondary: #ff3cac;
+    --accent-gold: #ffd700;
+    --error: #ff4757;
+    --success: #2ed573;
+    --warning: #ffa502;
+    --font-primary: 'Outfit', sans-serif;
+    --font-secondary: 'Inter', sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-secondary);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* === Animated Background === */
+.login-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.bg-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.3;
+    animation: floatOrb 20s ease-in-out infinite;
+}
+
+.orb-1 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, #ff3cac, transparent 70%);
+    top: -100px; left: -100px;
+    animation-delay: 0s;
+}
+
+.orb-2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, #00f5d4, transparent 70%);
+    bottom: -100px; right: -100px;
+    animation-delay: -5s;
+}
+
+.orb-3 {
+    width: 350px; height: 350px;
+    background: radial-gradient(circle, #784ba0, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: -10s;
+}
+
+.orb-4 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, #ffd700, transparent 70%);
+    bottom: 20%; left: 10%;
+    animation-delay: -15s;
+    opacity: 0.15;
+}
+
+@keyframes floatOrb {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(60px, -40px) scale(1.1); }
+    50% { transform: translate(-30px, 60px) scale(0.95); }
+    75% { transform: translate(40px, 30px) scale(1.05); }
+}
+
+.bg-film-strip {
+    position: absolute;
+    width: 200px;
+    height: 100%;
+    opacity: 0.02;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 40px,
+        rgba(255, 255, 255, 0.5) 40px,
+        rgba(255, 255, 255, 0.5) 42px
+    );
+}
+
+.strip-1 { left: 10%; transform: rotate(-5deg); }
+.strip-2 { right: 10%; transform: rotate(5deg); }
+
+/* === Floating Posters === */
+.floating-posters {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.floating-poster {
+    position: absolute;
+    width: 80px;
+    height: 120px;
+    border-radius: 8px;
+    opacity: 0.08;
+    animation: floatPoster 30s linear infinite;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes floatPoster {
+    0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.08; }
+    90% { opacity: 0.08; }
+    100% { transform: translateY(-120px) rotate(360deg); opacity: 0; }
+}
+
+/* === Login Container === */
+.login-container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    width: 100%;
+    max-width: 460px;
+}
+
+/* === Logo === */
+.login-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: transform 0.3s ease;
+}
+
+.login-logo:hover {
+    transform: scale(1.05);
+}
+
+.login-logo i {
+    font-size: 2rem;
+    color: var(--accent-primary);
+    filter: drop-shadow(0 0 10px rgba(0, 245, 212, 0.4));
+}
+
+.login-logo span {
+    font-family: var(--font-primary);
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+}
+
+.logo-accent {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* === Auth Card === */
+.auth-card {
+    width: 100%;
+    background: var(--bg-card);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 40px 36px;
+    box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+        0 1px 0 rgba(255, 255, 255, 0.1) inset;
+    animation: cardAppear 0.6s ease-out;
+}
+
+@keyframes cardAppear {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* === Auth Form === */
+.auth-form {
+    display: none;
+    animation: fadeSlideIn 0.4s ease-out;
+}
+
+.auth-form.active {
+    display: block;
+}
+
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.auth-title {
+    font-family: var(--font-primary);
+    font-size: 1.8rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #ffffff, rgba(255, 255, 255, 0.8));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 32px;
+}
+
+/* === Input Groups === */
+.input-group {
+    margin-bottom: 18px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+    z-index: 2;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 14px 48px 14px 46px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    color: var(--text-primary);
+    font-family: var(--font-secondary);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.input-wrapper input::placeholder {
+    color: var(--text-muted);
+}
+
+.input-wrapper input:focus {
+    border-color: var(--border-focus);
+    background: rgba(0, 245, 212, 0.04);
+    box-shadow: 0 0 0 4px rgba(0, 245, 212, 0.08);
+}
+
+.input-wrapper input:focus + .input-icon,
+.input-wrapper input:focus ~ .input-icon {
+    color: var(--accent-primary);
+}
+
+/* Fix: icon is before input, so use has() or rely on parent */
+.input-wrapper:focus-within .input-icon {
+    color: var(--accent-primary);
+}
+
+.input-group.error .input-wrapper input {
+    border-color: var(--error);
+    box-shadow: 0 0 0 4px rgba(255, 71, 87, 0.1);
+}
+
+.input-group.error .input-icon {
+    color: var(--error);
+}
+
+.input-error {
+    display: block;
+    color: var(--error);
+    font-size: 0.78rem;
+    margin-top: 6px;
+    padding-left: 4px;
+    min-height: 0;
+    transition: all 0.3s ease;
+}
+
+/* === Toggle Password === */
+.toggle-password {
+    position: absolute;
+    right: 14px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 4px;
+    transition: color 0.3s ease;
+    z-index: 2;
+}
+
+.toggle-password:hover {
+    color: var(--accent-primary);
+}
+
+/* === Password Strength === */
+.password-strength {
+    margin: -8px 0 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.strength-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 4px;
+    transition: width 0.4s ease, background 0.4s ease;
+}
+
+.strength-text {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 50px;
+    text-align: right;
+}
+
+/* === Form Options === */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.remember-me input[type="checkbox"] {
+    display: none;
+}
+
+.checkmark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.checkmark::after {
+    content: '✓';
+    font-size: 0.7rem;
+    color: var(--bg-primary);
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.2s ease;
+}
+
+.remember-me input:checked ~ .checkmark,
+.terms-check input:checked ~ .checkmark {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.remember-me input:checked ~ .checkmark::after,
+.terms-check input:checked ~ .checkmark::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.forgot-link {
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.forgot-link:hover {
+    color: var(--accent-secondary);
+}
+
+/* === Terms Check === */
+.terms-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.terms-check input[type="checkbox"] {
+    display: none;
+}
+
+.terms-check a {
+    color: var(--accent-primary);
+    text-decoration: none;
+}
+
+.terms-check a:hover {
+    text-decoration: underline;
+}
+
+/* === Auth Button === */
+.auth-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--accent-primary), #00c9a7);
+    border: none;
+    border-radius: 14px;
+    color: var(--bg-primary);
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+}
+
+.auth-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.auth-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 245, 212, 0.3);
+}
+
+.auth-btn:hover::before {
+    left: 100%;
+}
+
+.auth-btn:active {
+    transform: translateY(0);
+}
+
+.auth-btn.loading .btn-text { opacity: 0; }
+.auth-btn.loading .btn-loader { opacity: 1; }
+
+.btn-loader {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* === Divider === */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    margin: 24px 0;
+    gap: 16px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+}
+
+.auth-divider span {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+/* === Social Login === */
+.social-login {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.social-btn {
+    width: 56px;
+    height: 48px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.social-btn:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.social-btn.google:hover {
+    background: rgba(234, 67, 53, 0.15);
+    border-color: rgba(234, 67, 53, 0.4);
+    color: #ea4335;
+    box-shadow: 0 8px 24px rgba(234, 67, 53, 0.2);
+}
+
+.social-btn.github:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.1);
+}
+
+.social-btn.twitter:hover {
+    background: rgba(29, 161, 242, 0.15);
+    border-color: rgba(29, 161, 242, 0.4);
+    color: #1da1f2;
+    box-shadow: 0 8px 24px rgba(29, 161, 242, 0.2);
+}
+
+/* === Auth Switch === */
+.auth-switch {
+    text-align: center;
+    margin-top: 20px;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}
+
+.auth-switch a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.auth-switch a:hover {
+    color: var(--accent-secondary);
+}
+
+/* === Footer === */
+.login-footer {
+    margin-top: 24px;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    text-align: center;
+}
+
+/* === Toast === */
+.login-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    z-index: 9999;
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.login-toast.show {
+    transform: translateX(0);
+}
+
+.login-toast.success {
+    background: rgba(46, 213, 115, 0.15);
+    border: 1px solid rgba(46, 213, 115, 0.3);
+    color: var(--success);
+}
+
+.login-toast.error {
+    background: rgba(255, 71, 87, 0.15);
+    border: 1px solid rgba(255, 71, 87, 0.3);
+    color: var(--error);
+}
+
+.login-toast.info {
+    background: rgba(0, 245, 212, 0.15);
+    border: 1px solid rgba(0, 245, 212, 0.3);
+    color: var(--accent-primary);
+}
+
+/* === Responsive === */
+@media (max-width: 480px) {
+    .login-container {
+        padding: 30px 16px;
+    }
+
+    .auth-card {
+        padding: 30px 24px;
+        border-radius: 20px;
+    }
+
+    .auth-title {
+        font-size: 1.5rem;
+    }
+
+    .social-btn {
+        width: 48px;
+        height: 44px;
+    }
+
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+
+@media (max-height: 700px) {
+    body {
+        align-items: flex-start;
+    }
+    .login-container {
+        padding-top: 20px;
+    }
+}
