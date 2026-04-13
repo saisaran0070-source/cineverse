@@ -242,14 +242,9 @@
                     <h3 class="player-title" id="playerTitle">Movie Title</h3>
                     <span class="player-year" id="playerYear">2024</span>
                 </div>
-                <div class="player-header-actions">
-                    <button class="player-action-btn" id="playerFullscreen" title="Fullscreen">
-                        <i class="fas fa-expand"></i>
-                    </button>
-                    <button class="player-close" id="playerClose" title="Close">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+                <button class="player-close" id="playerClose" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="player-wrapper" id="playerWrapper">
                 <iframe id="moviePlayer" allowfullscreen webkitallowfullscreen mozallowfullscreen allow="autoplay; encrypted-media; fullscreen" frameborder="0"></iframe>
@@ -261,14 +256,13 @@
             <div class="player-controls-bar">
                 <div class="server-controls">
                     <span class="server-label">Server:</span>
-                    <button class="server-btn active highlight" data-server="1" id="server1">Server 1 (Auto)</button>
-                    <button class="server-btn" data-server="2" id="server2">Server 2 (Stable)</button>
-                    <button class="server-btn" data-server="3" id="server3">Server 3 (HD)</button>
-                    <button class="server-btn" data-server="4" id="server4">Server 4</button>
-                    <button class="server-btn" data-server="5" id="server5">Server 5</button>
-                    <button class="server-btn" data-server="6" id="server6">Server 6</button>
-                    <button class="server-btn" data-server="7" id="server7">Server 7</button>
-                    <button class="server-btn" id="externalPlayBtn" style="background: var(--accent-primary); border-color: transparent; color: white;">
+                    <button type="button" class="server-btn active highlight" data-server="1" id="server1">Server 1 (Auto)</button>
+                    <button type="button" class="server-btn" data-server="2" id="server2">Server 2 (Stable)</button>
+                    <button type="button" class="server-btn" data-server="3" id="server3">Server 3 (HD)</button>
+                    <button type="button" class="server-btn" data-server="4" id="server4">Server 4</button>
+                    <button type="button" class="server-btn" data-server="5" id="server5">Server 5</button>
+                    <button type="button" class="server-btn" data-server="6" id="server6">Server 6</button>
+                    <button type="button" class="server-btn" id="externalPlayBtn" style="background: var(--accent-primary); border-color: transparent; color: white;">
                         <i class="fas fa-external-link-alt" style="margin-right: 4px;"></i> Open in New Window
                     </button>
                 </div>

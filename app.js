@@ -745,31 +745,6 @@ function setupNavigation() {
 
     $('#playerClose').addEventListener('click', closePlayer);
 
-    const playerFsBtn = $('#playerFullscreen');
-    if (playerFsBtn) {
-        playerFsBtn.addEventListener('click', () => {
-            const container = $('.player-container');
-            if (!document.fullscreenElement) {
-                if (container.requestFullscreen) container.requestFullscreen();
-                else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
-                else if (container.mozRequestFullScreen) container.mozRequestFullScreen();
-                else if (container.msRequestFullscreen) container.msRequestFullscreen();
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-                else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
-                else if (document.msExitFullscreen) document.msExitFullscreen();
-            }
-        });
-    }
-
-    document.addEventListener('fullscreenchange', () => {
-        const icon = $('#playerFullscreen i');
-        if (icon) {
-            icon.className = document.fullscreenElement ? 'fas fa-compress' : 'fas fa-expand';
-        }
-    });
-
     $('#detailClose').addEventListener('click', () => {
         $('#detailModal').classList.remove('active');
         document.body.style.overflow = '';
@@ -788,15 +763,17 @@ function setupNavigation() {
         });
     });
 
-    $('#externalPlayBtn').addEventListener('click', () => {
+    $('#externalPlayBtn').addEventListener('click', (e) => {
+        e.preventDefault(); // Stop any accidental page refresh
         if (currentMovieId) {
             const url = CONFIG.EMBED_SERVERS[currentServer](currentMovieId);
             window.open(url, '_blank');
+        } else {
+            showToast("Opening movie in new window...");
         }
     });
 
-    // Backdrop click disabled to prevent accidental closure on touch devices
-    // $('#playerModal').addEventListener('click', (e) => { if (e.target === $('#playerModal')) closePlayer(); });
+    $('#playerModal').addEventListener('click', (e) => { if (e.target === $('#playerModal')) closePlayer(); });
 
     $('#detailModal').addEventListener('click', (e) => {
         if (e.target === $('#detailModal')) {
