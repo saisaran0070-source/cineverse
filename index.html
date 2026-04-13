@@ -254,19 +254,32 @@
                 </div>
             </div>
             <div class="player-controls-bar">
-                <div class="player-instructions" style="color: var(--text-muted); font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-info-circle" style="color: var(--accent-primary);"></i>
-                    <span>To change Audio Language or Subtitles, click the <b>CC</b> or <b>⚙️ Gear icon</b> inside the video player above.</span>
+                <div class="player-guide-container">
+                    <div class="player-guide-item">
+                        <i class="fas fa-volume-up"></i>
+                        <span><b>Audio Track:</b> Click the <b>⚙️ Gear icon</b> in the player to switch to <b>Tamil/Hindi</b> if available.</span>
+                    </div>
+                    <div class="player-guide-item">
+                        <i class="fas fa-closed-captioning"></i>
+                        <span><b>Subtitles:</b> Click the <b>CC</b> button to enable subtitles.</span>
+                    </div>
                 </div>
+                
+                <div class="language-track-status" id="languageTrackStatus">
+                    <!-- Badges like [Tamil Audio Ready] will be injected here -->
+                </div>
+
                 <div class="server-controls">
                     <span class="server-label">Server:</span>
-                    <button class="server-btn active" data-server="1" id="server1" style="background:var(--gradient-primary);color:white;border:none;">Server 1 (Best HD/Multi-Audio)</button>
-                    <button class="server-btn" data-server="2" id="server2">Server 2</button>
-                    <button class="server-btn" data-server="3" id="server3">Server 3</button>
+                    <button class="server-btn active highlight" data-server="1" id="server1">Server 1 (Primary)</button>
+                    <button class="server-btn" data-server="2" id="server2">Server 2 (Subs/Multi)</button>
+                    <button class="server-btn" data-server="3" id="server3">Server 3 (HD)</button>
                     <button class="server-btn" data-server="4" id="server4">Server 4</button>
                     <button class="server-btn" data-server="5" id="server5">Server 5</button>
+                    <button class="server-btn" data-server="6" id="server6">Server 6</button>
+                    <button class="server-btn" data-server="7" id="server7" style="background: var(--accent-gold); color: black; border: none;">Server 7 (External Link)</button>
                     <button class="server-btn" id="externalPlayBtn" style="background: var(--accent-primary); border-color: transparent; color: white;">
-                        <i class="fas fa-external-link-alt" style="margin-right: 4px;"></i> Open in New Tab
+                        <i class="fas fa-external-link-alt" style="margin-right: 4px;"></i> Open in New Window
                     </button>
                 </div>
             </div>

@@ -10,17 +10,19 @@ const CONFIG = {
     TMDB_BASE: 'https://api.themoviedb.org/3',
     IMG_BASE: 'https://image.tmdb.org/t/p',
     EMBED_SERVERS: [
-        // Primary: Embed.su (BEST for Subtitles & Multi-Audio)
-        (id) => `https://embed.su/embed/movie/${id}`,
-        // Secondary: Vidsrc.me (Working perfectly)
+        // Primary: Vidsrc.me (Most stable, confirmed working)
         (id) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
-        // Tertiary: Smashy Stream (Ad-heavy but usually works)
+        // Secondary: Vidsrc.to (Great UI and subtitle support)
+        (id) => `https://vidsrc.to/embed/movie/${id}`,
+        // Tertiary: SuperEmbed (Used by top sites, good regional audio)
+        (id) => `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
+        // Quaternary: Smashy Stream
         (id) => `https://player.smashy.stream/movie/${id}`,
-        // Fallback: Autoembed
-        (id) => `https://autoembed.to/movie/tmdb/${id}`,
-        // Fallback 2: Vidsrc Pro
+        // Fallback: Vidsrc Pro
         (id) => `https://vidsrc.pro/embed/movie/${id}`,
-        // Custom URL shortcut (for the 'External' button to pop out)
+        // Fallback 2: Embed.su (Moved to bottom due to connection issues)
+        (id) => `https://embed.su/embed/movie/${id}`,
+        // Custom URL shortcut
         (id) => `https://vidsrc.net/embed/movie?tmdb=${id}`
     ]
 };
@@ -614,7 +616,7 @@ function showAdBlockerTip(onContinue) {
     });
 }
 
-function launchPlayer(movieId, title, year) {
+async function launchPlayer(movieId, title, year) {
     currentMovieId = movieId;
     currentServer = 0;
 
@@ -622,6 +624,11 @@ function launchPlayer(movieId, title, year) {
     $('#playerYear').textContent = year;
     $('#playerLoading').classList.remove('hidden');
 
+    // Reset badges
+    const statusDiv = $('#languageTrackStatus');
+    if (statusDiv) statusDiv.innerHTML = '<span style="color:var(--text-muted);font-size:0.7rem;">Checking audio tracks...</span>';
+
+    // Highlight first server
     $$('.server-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
     loadMovieStream(movieId, 0);
 
@@ -629,6 +636,45 @@ function launchPlayer(movieId, title, year) {
     document.body.style.overflow = 'hidden';
 
     showToast(`Loading "${title}"...`);
+
+    // Fetch and Show Language Badges
+    try {
+        const data = await tmdbFetch(`/movie/${movieId}/translations`);
+        if (data && data.translations && statusDiv) {
+            statusDiv.innerHTML = '';
+            const codes = data.translations.map(t => t.iso_639_1);
+            
+            // Add Always-Ready Badge
+            const subBadge = document.createElement('span');
+            subBadge.className = 'lang-badge';
+            subBadge.innerHTML = '<i class="fas fa-closed-captioning"></i> Multi-Subtitles Ready';
+            statusDiv.appendChild(subBadge);
+
+            // Add Regional Dub Badges
+            if (codes.includes('ta')) {
+                const badge = document.createElement('span');
+                badge.className = 'lang-badge dubbed';
+                badge.innerHTML = '<i class="fas fa-volume-up"></i> Tamil Audio';
+                statusDiv.appendChild(badge);
+            }
+            if (codes.includes('hi')) {
+                const badge = document.createElement('span');
+                badge.className = 'lang-badge dubbed';
+                badge.innerHTML = '<i class="fas fa-volume-up"></i> Hindi Audio';
+                statusDiv.appendChild(badge);
+            }
+            if (codes.length > 5) {
+                const multiBadge = document.createElement('span');
+                multiBadge.className = 'lang-badge';
+                multiBadge.innerHTML = '<i class="fas fa-language"></i> Multi-Audio Info';
+                statusDiv.appendChild(multiBadge);
+            }
+        } else if (statusDiv) {
+             statusDiv.innerHTML = '<span style="color:var(--text-muted);font-size:0.7rem;">Only standard tracks available</span>';
+        }
+    } catch (e) {
+        console.error("Error fetching languages:", e);
+    }
 }
 
 function loadMovieStream(movieId, serverIndex) {
@@ -742,14 +788,15 @@ function setupNavigation() {
         document.body.style.overflow = '';
     });
 
-    $$('.server-btn:not(#externalPlayBtn)').forEach((btn, i) => {
+    $$('.server-btn[data-server]').forEach((btn) => {
         btn.addEventListener('click', () => {
             if (currentMovieId) {
-                $$('.server-btn:not(#externalPlayBtn)').forEach(b => b.classList.remove('active'));
+                const serverIdx = parseInt(btn.dataset.server) - 1;
+                $$('.server-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                currentServer = i;
-                loadMovieStream(currentMovieId, i);
-                showToast(`Switched to Server ${i + 1}`);
+                currentServer = serverIdx;
+                loadMovieStream(currentMovieId, serverIdx);
+                showToast(`Switched to Server ${serverIdx + 1}`);
             }
         });
     });
