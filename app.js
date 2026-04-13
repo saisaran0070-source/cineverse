@@ -187,7 +187,14 @@ let isUsingFallback = false;
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
-// === API Helpers ===
+async function tmdbFetch(endpoint, params = {}) {
+    const url = new URL(`${CONFIG.TMDB_BASE}${endpoint}`);
+    url.searchParams.set('api_key', CONFIG.TMDB_API_KEY);
+    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+
     try {
         const resp = await fetch(url, { signal: controller.signal });
         if (!resp.ok) throw new Error(`HTTP error! status: ${resp.ok}`);
@@ -225,15 +232,6 @@ function setupPlatformNav() {
         });
     });
 }
-        clearTimeout(timeout);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        return await resp.json();
-    } catch (err) {
-        clearTimeout(timeout);
-        console.warn(`TMDB Error [${endpoint}]:`, err.message);
-        isUsingFallback = true;
-        return null;
-    }
 }
 
 // Image URL helpers — handles both TMDB paths (from API) and our generated SVGs (from sample data)
