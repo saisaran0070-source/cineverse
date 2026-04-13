@@ -652,11 +652,15 @@ function loadMovieStream(movieId, serverIndex) {
 
     iframe.onload = () => {
         clearTimeout(loadTimeout);
-        setTimeout(() => loading.classList.add('hidden'), 1000);
+        setTimeout(() => {
+            loading.classList.add('hidden');
+            loading.style.pointerEvents = 'none'; // Ensure it doesn't block clicks
+        }, 1000);
     };
 
     iframe.onerror = () => {
         clearTimeout(loadTimeout);
+        loading.style.pointerEvents = 'all'; // Re-enable for the error message
         loading.innerHTML = `
             <i class="fas fa-exclamation-triangle" style="font-size:2rem;color:var(--accent-gold)"></i>
             <p>Server not responding</p>
@@ -665,7 +669,10 @@ function loadMovieStream(movieId, serverIndex) {
     };
 
     // Fallback: hide loading after 8 seconds regardless
-    setTimeout(() => loading.classList.add('hidden'), 8000);
+    setTimeout(() => {
+        loading.classList.add('hidden');
+        loading.style.pointerEvents = 'none';
+    }, 8000);
 }
 
 function closePlayer() {
@@ -738,6 +745,31 @@ function setupNavigation() {
 
     $('#playerClose').addEventListener('click', closePlayer);
 
+    const playerFsBtn = $('#playerFullscreen');
+    if (playerFsBtn) {
+        playerFsBtn.addEventListener('click', () => {
+            const container = $('.player-container');
+            if (!document.fullscreenElement) {
+                if (container.requestFullscreen) container.requestFullscreen();
+                else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+                else if (container.mozRequestFullScreen) container.mozRequestFullScreen();
+                else if (container.msRequestFullscreen) container.msRequestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+                else if (document.msExitFullscreen) document.msExitFullscreen();
+            }
+        });
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+        const icon = $('#playerFullscreen i');
+        if (icon) {
+            icon.className = document.fullscreenElement ? 'fas fa-compress' : 'fas fa-expand';
+        }
+    });
+
     $('#detailClose').addEventListener('click', () => {
         $('#detailModal').classList.remove('active');
         document.body.style.overflow = '';
@@ -763,7 +795,8 @@ function setupNavigation() {
         }
     });
 
-    $('#playerModal').addEventListener('click', (e) => { if (e.target === $('#playerModal')) closePlayer(); });
+    // Backdrop click disabled to prevent accidental closure on touch devices
+    // $('#playerModal').addEventListener('click', (e) => { if (e.target === $('#playerModal')) closePlayer(); });
 
     $('#detailModal').addEventListener('click', (e) => {
         if (e.target === $('#detailModal')) {
