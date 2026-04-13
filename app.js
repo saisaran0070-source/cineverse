@@ -998,20 +998,22 @@ function setupFeedbackUI() {
             submitBtn.disabled = true;
 
             try {
-                // Save to Firestore
-                await addDoc(collection(db, "website_reviews"), {
+                // Save to Firestore using global references for stability
+                const reviewsRef = window.db.collection("website_reviews");
+                await reviewsRef.add({
                     userId: user.uid,
                     userName: user.displayName || user.email,
                     rating: currentRating,
                     comment: commentBox.value.trim(),
-                    timestamp: serverTimestamp()
+                    timestamp: window.serverTimestamp()
                 });
 
                 contentView.classList.add('hidden');
                 successView.classList.remove('hidden');
+                showToast("Thank you for your feedback!");
             } catch (error) {
-                console.error("Error adding review: ", error);
-                showToast("Failed to submit review. Try again.");
+                console.error("Firebase Review Error: ", error);
+                showToast("Submission failed: " + error.message);
             } finally {
                 submitBtn.textContent = 'Submit Feedback';
                 submitBtn.disabled = false;
