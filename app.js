@@ -208,32 +208,6 @@ async function tmdbFetch(endpoint, params = {}) {
     }
 }
 
-// === Platform Mapping ===
-const PLATFORM_MAP = {
-    netflix: { id: 8, name: 'Netflix', color: '#e50914' },
-    prime: { id: 119, name: 'Amazon Prime', color: '#00a8e1' },
-    hotstar: { id: 122, name: 'JioHotstar', color: '#ffcc00' }
-};
-
-let activePlatform = 'all';
-
-function setupPlatformNav() {
-    $$('.platform-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            $$('.platform-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            activePlatform = btn.dataset.platform;
-            
-            showToast(`Loading movies from ${btn.innerText}...`);
-            handleNavSection('home'); // Reload home with filter
-            
-            // Scroll to top of content
-            window.scrollTo({ top: $('#platformNav').offsetTop - 100, behavior: 'smooth' });
-        });
-    });
-}
-}
-
 // Image URL helpers — handles both TMDB paths (from API) and our generated SVGs (from sample data)
 function imgUrl(movie, size = 'w500') {
     // If movie has a custom poster URL (sample data), use it
@@ -342,28 +316,10 @@ function createSkeletons(container, count = 8) {
 }
 
 // === Load Movie Rows ===
-async function fetchPlatformMovies(endpoint, category) {
-    let params = { page: 1 };
-    
-    // If a platform filter is active, we use the discover endpoint instead of generic lists
-    if (activePlatform !== 'all' && PLATFORM_MAP[activePlatform]) {
-        return await tmdbFetch('/discover/movie', {
-            ...params,
-            with_watch_providers: PLATFORM_MAP[activePlatform].id,
-            watch_region: 'IN', // Priority for India as requested
-            sort_by: 'popularity.desc'
-        });
-    }
-    
-    // Default behavior for "All Movies"
-    return await tmdbFetch(endpoint, params);
-}
-
 async function loadNowPlaying() {
     const c = $('#nowPlayingRow');
-    if (!c) return;
     createSkeletons(c);
-    const data = await fetchPlatformMovies('/movie/now_playing', 'now_playing');
+    const data = await tmdbFetch('/movie/now_playing', { page: 1 });
     const movies = data?.results || getSampleMovies('now_playing');
     c.innerHTML = '';
     movies.forEach((m, i) => c.appendChild(createMovieCard(m, i)));
@@ -371,12 +327,8 @@ async function loadNowPlaying() {
 
 async function loadTrending() {
     const c = $('#trendingRow');
-    if (!c) return;
     createSkeletons(c);
-    
-    // Trending doesn't support with_watch_providers directly in some endpoints, 
-    // so we use discover with a date range for a similar effect
-    const data = await fetchPlatformMovies('/trending/movie/week', 'trending');
+    const data = await tmdbFetch('/trending/movie/week');
     const movies = data?.results || getSampleMovies('trending');
     c.innerHTML = '';
     movies.forEach((m, i) => c.appendChild(createMovieCard(m, i)));
@@ -384,9 +336,8 @@ async function loadTrending() {
 
 async function loadTopRated() {
     const c = $('#topRatedRow');
-    if (!c) return;
     createSkeletons(c);
-    const data = await fetchPlatformMovies('/movie/top_rated', 'top_rated');
+    const data = await tmdbFetch('/movie/top_rated', { page: 1 });
     const movies = data?.results || getSampleMovies('top_rated');
     c.innerHTML = '';
     movies.forEach((m, i) => c.appendChild(createMovieCard(m, i)));
@@ -394,9 +345,8 @@ async function loadTopRated() {
 
 async function loadUpcoming() {
     const c = $('#upcomingRow');
-    if (!c) return;
     createSkeletons(c);
-    const data = await fetchPlatformMovies('/movie/upcoming', 'upcoming');
+    const data = await tmdbFetch('/movie/upcoming', { page: 1 });
     const movies = data?.results || getSampleMovies('upcoming');
     c.innerHTML = '';
     movies.forEach((m, i) => c.appendChild(createMovieCard(m, i)));
@@ -668,16 +618,10 @@ function showAdBlockerTip(onContinue) {
 async function launchPlayer(movieId, title, year) {
     currentMovieId = movieId;
     currentServer = 0;
-    currentAudio = 'en';
 
     $('#playerTitle').textContent = title;
     $('#playerYear').textContent = year;
     $('#playerLoading').classList.remove('hidden');
-
-    const switchContainer = $('#audioSwitchButtons');
-    if (switchContainer) {
-        switchContainer.innerHTML = '<span style="color:var(--text-muted);font-size:0.75rem;">Detecting audio tracks...</span>';
-    }
 
     $$('.server-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
     loadMovieStream(movieId, 0);
@@ -686,76 +630,23 @@ async function launchPlayer(movieId, title, year) {
     document.body.style.overflow = 'hidden';
 
     showToast(`Loading "${title}"...`);
-
-    // Fetch and Show Language Buttons
-    try {
-        const data = await tmdbFetch(`/movie/${movieId}/translations`);
-        if (data && data.translations && switchContainer) {
-            switchContainer.innerHTML = '';
-            const codes = data.translations.map(t => t.iso_639_1);
-            
-            // Default Original Button
-            switchContainer.appendChild(createAudioBtn('en', 'English / Original', true));
-
-            // Regional Selection
-            const regionalLangs = [
-                { code: 'ta', label: 'Tamil' },
-                { code: 'hi', label: 'Hindi' },
-                { code: 'te', label: 'Telugu' },
-                { code: 'ml', label: 'Malayalam' }
-            ];
-
-            regionalLangs.forEach(lang => {
-                if (codes.includes(lang.code)) {
-                    switchContainer.appendChild(createAudioBtn(lang.code, lang.label, false));
-                }
-            });
-        }
-    } catch (e) {
-        console.error("Error fetching languages:", e);
-    }
 }
-
-function createAudioBtn(code, label, isActive) {
-    const btn = document.createElement('button');
-    btn.className = `audio-btn ${isActive ? 'active' : ''}`;
-    btn.innerHTML = `<i class="fas fa-volume-up"></i> ${label}`;
-    btn.onclick = () => {
-        $$('.audio-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentAudio = code;
-        showToast(`Switching to ${label} track...`);
-        loadMovieStream(currentMovieId, currentServer);
-    };
-    return btn;
-}
-
-let currentAudio = 'en';
 
 function loadMovieStream(movieId, serverIndex) {
     const iframe = $('#moviePlayer');
     const loading = $('#playerLoading');
+
     loading.classList.remove('hidden');
 
-    let embedUrl = CONFIG.EMBED_SERVERS[serverIndex](movieId);
-    
-    // Add language optimization if regional audio selected
-    if (currentAudio !== 'en') {
-        const separator = embedUrl.includes('?') ? '&' : '?';
-        embedUrl += `${separator}dub=1&lang=${currentAudio}&audio_lang=${currentAudio}`;
-    }
-
+    const embedUrl = CONFIG.EMBED_SERVERS[serverIndex](movieId);
     iframe.src = embedUrl;
 
+    // Show a message inside loading overlay after some time
     let loadTimeout = setTimeout(() => {
-        const warning = currentAudio !== 'en' ? 
-            `<p style="font-size:0.8rem;color:var(--accent-gold);margin-top:10px">Searching for <b>${currentAudio.toUpperCase()}</b> audio. If it fails, try <b>Server 2</b>.</p>` :
-            `<p style="font-size:0.8rem;color:var(--text-muted);margin-top:10px">If slow, try switching servers below.</p>`;
-        
         loading.innerHTML = `
             <div class="spinner"></div>
-            <p>Loading stream...</p>
-            ${warning}
+            <p>Loading movie...</p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:10px">If the movie doesn't load, try switching servers below.</p>
         `;
     }, 3000);
 
@@ -766,9 +657,14 @@ function loadMovieStream(movieId, serverIndex) {
 
     iframe.onerror = () => {
         clearTimeout(loadTimeout);
-        loading.innerHTML = '<i class="fas fa-exclamation-triangle"></i><p>Server error</p>';
+        loading.innerHTML = `
+            <i class="fas fa-exclamation-triangle" style="font-size:2rem;color:var(--accent-gold)"></i>
+            <p>Server not responding</p>
+            <p style="font-size:0.8rem;color:var(--text-muted)">Try switching to a different server below</p>
+        `;
     };
-    
+
+    // Fallback: hide loading after 8 seconds regardless
     setTimeout(() => loading.classList.add('hidden'), 8000);
 }
 

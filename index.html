@@ -114,29 +114,9 @@
         <div class="hero-slider" id="heroSlider"></div>
     </section>
 
-    <!-- Platform Navigation (Netflix, Prime, Hotstar) -->
-    <div class="platform-nav" id="platformNav">
-        <div class="container" style="display: flex; justify-content: center;">
-            <div class="platform-items">
-                <button class="platform-btn" data-platform="netflix" style="--pf-color: #e50914;">
-                    <i class="fab fa-netflix"></i> Netflix
-                </button>
-                <button class="platform-btn" data-platform="prime" style="--pf-color: #00a8e1;">
-                    <i class="fab fa-amazon"></i> Amazon Prime
-                </button>
-                <button class="platform-btn" data-platform="hotstar" style="--pf-color: #ffcc00; color: #000;">
-                    <i class="fas fa-play"></i> JioHotstar
-                </button>
-                <button class="platform-btn" data-platform="all" style="--pf-color: var(--accent-primary);">
-                    <i class="fas fa-th-large"></i> All Movies
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content -->
+    <!-- Main Container -->
     <main class="main-content">
-        <!-- Now Playing -->
+        <!-- Genres Section -->
         <section class="movie-section" id="nowPlayingSection">
             <div class="section-header">
                 <h2 class="section-title">
@@ -274,13 +254,6 @@
                 </div>
             </div>
             <div class="player-controls-bar">
-                <div class="language-selection-area">
-                    <span class="selection-label"><i class="fas fa-language"></i> Change Audio:</span>
-                    <div class="audio-switch-buttons" id="audioSwitchButtons">
-                        <!-- Buttons like [Tamil] [Hindi] will be injected here as clickable buttons -->
-                    </div>
-                </div>
-                
                 <div class="server-controls">
                     <span class="server-label">Server:</span>
                     <button class="server-btn active highlight" data-server="1" id="server1">Server 1 (Primary)</button>
