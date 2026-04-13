@@ -1019,25 +1019,30 @@ function setupFeedbackUI() {
             submitBtn.disabled = true;
 
             try {
-                // Ensure fresh database link
-                if (!window.db) throw new Error("Database connection is not ready. Please refresh.");
+                if (!window.db) throw new Error("Database connection is not ready. Please refresh the page.");
 
-                // Reverting to ORIGINAL collection name 'feedback'
-                const reviewsRef = window.db.collection("feedback");
-                await reviewsRef.add({
-                    userId: user.uid,
-                    userName: user.displayName || user.email,
-                    rating: currentRating,
-                    comment: commentBox.value.trim(),
-                    timestamp: window.serverTimestamp()
+                // Using standard .add() with explicit user data for security rules compatibility
+                await window.db.collection("feedback").add({
+                    userId: String(user.uid),
+                    userName: String(user.displayName || user.email || 'Anonymous Member'),
+                    rating: Number(currentRating),
+                    comment: String(commentBox.value.trim()),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 contentView.classList.add('hidden');
                 successView.classList.remove('hidden');
-                showToast("Thank you for your feedback!");
+                showToast("Perfect! Your review has been saved.");
             } catch (error) {
                 console.error("Firebase Review Error: ", error);
-                showToast("Failed to save review: " + error.message);
+                
+                // If it's a permission error, give the user specific advice
+                if (error.code === 'permission-denied') {
+                    showToast("Database Locked: Please update your Firebase Rules.");
+                    alert("SECURITY ALERT: Your Firebase Database rules are currently blocking reviews. \n\nPlease go to Firebase Console > Firestore > Rules and set them to 'allow write: if request.auth != null;'");
+                } else {
+                    showToast("Error: " + error.message);
+                }
             } finally {
                 submitBtn.textContent = 'Submit Feedback';
                 submitBtn.disabled = false;
