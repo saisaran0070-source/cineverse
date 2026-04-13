@@ -178,6 +178,7 @@ function getSampleMovies(category) {
 // === State ===
 let currentServer = 0;
 let currentMovieId = null;
+let currentLang = '';
 let heroMovies = [];
 let heroIndex = 0;
 let heroInterval = null;
@@ -642,12 +643,51 @@ function showAdBlockerTip(onContinue) {
 async function launchPlayer(movieId, title, year) {
     currentMovieId = movieId;
     currentServer = 0;
+    currentLang = '';
 
     $('#playerTitle').textContent = title;
     $('#playerYear').textContent = year;
     $('#playerLoading').classList.remove('hidden');
 
-    $$('.server-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+    $$('.server-btn[data-server]').forEach((b, i) => b.classList.toggle('active', i === 0));
+    
+    const audioContainer = $('#audioTrackContainer');
+    if (audioContainer) {
+        audioContainer.innerHTML = '<button type="button" class="server-btn active highlight" data-lang="">Original (Auto)</button>';
+        
+        audioContainer.firstElementChild.addEventListener('click', function() {
+            if (currentLang === '') return;
+            $$('#audioTrackContainer .server-btn').forEach(b => b.classList.remove('active', 'highlight'));
+            this.classList.add('active', 'highlight');
+            currentLang = '';
+            loadMovieStream(currentMovieId, currentServer);
+            showToast('Audio set to Original');
+        });
+
+        if (CONFIG.TMDB_API_KEY && !isUsingFallback) {
+            tmdbFetch(`/movie/${movieId}`).then(details => {
+                if (details && details.spoken_languages && details.spoken_languages.length > 0) {
+                    details.spoken_languages.forEach(lang => {
+                        if (!lang.iso_639_1) return;
+                        const btn = document.createElement('button');
+                        btn.className = 'server-btn';
+                        btn.dataset.lang = lang.iso_639_1;
+                        btn.textContent = lang.english_name || lang.name;
+                        btn.addEventListener('click', function() {
+                            if (currentLang === this.dataset.lang) return;
+                            $$('#audioTrackContainer .server-btn').forEach(b => b.classList.remove('active', 'highlight'));
+                            this.classList.add('active', 'highlight');
+                            currentLang = this.dataset.lang;
+                            loadMovieStream(currentMovieId, currentServer);
+                            showToast(`Audio set to ${this.textContent}`);
+                        });
+                        audioContainer.appendChild(btn);
+                    });
+                }
+            });
+        }
+    }
+
     loadMovieStream(movieId, 0);
 
     $('#playerModal').classList.add('active');
@@ -663,7 +703,13 @@ function loadMovieStream(movieId, serverIndex) {
 
     loading.classList.remove('hidden');
 
-    const embedUrl = CONFIG.EMBED_SERVERS[serverIndex](movieId);
+    let embedUrl = CONFIG.EMBED_SERVERS[serverIndex](movieId);
+    
+    // Append language parameters for servers that support it
+    if (currentLang) {
+        embedUrl += embedUrl.includes('?') ? `&lang=${currentLang}&audio=${currentLang}` : `?lang=${currentLang}&audio=${currentLang}`;
+    }
+
     iframe.src = embedUrl;
     
     // Update the "Open in New Window" link directly
@@ -1232,3 +1278,41 @@ function showToast(message, duration = 3000) {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// === Fullscreen Logic (Surgical Addition) ===
+function toggleFullscreen() {
+    const container = document.querySelector('.player-container');
+    if (!container) return;
+
+    if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+        if (container.requestFullscreen) container.requestFullscreen();
+        else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+        else if (container.mozRequestFullScreen) container.mozRequestFullScreen();
+        else if (container.msRequestFullscreen) container.msRequestFullscreen();
+        
+        document.getElementById('playerFullscreen').innerHTML = '<i class="fas fa-compress"></i>';
+    } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+        else if (document.msExitFullscreen) document.msExitFullscreen();
+        
+        document.getElementById('playerFullscreen').innerHTML = '<i class="fas fa-expand"></i>';
+    }
+}
+
+// Add listener for the new button
+document.addEventListener('click', (e) => {
+    if (e.target.closest('#playerFullscreen')) {
+        toggleFullscreen();
+    }
+});
+
+// Update icon if fullscreen exited via ESC key
+document.addEventListener('fullscreenchange', () => {
+    const btn = document.getElementById('playerFullscreen');
+    if (btn) {
+        btn.innerHTML = document.fullscreenElement ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>';
+    }
+});
+

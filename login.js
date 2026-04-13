@@ -298,5 +298,85 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// === Phone Login Implementation (Surgical Addition) ===
+let confirmationResult = null;
+
+function setupPhoneAuth() {
+    if (!$('#phoneLoginBtn')) return;
+
+    // Initialize reCAPTCHA
+    window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
+        'size': 'invisible',
+        'callback': (response) => {
+            // reCAPTCHA solved, allow signInWithPhoneNumber.
+        }
+    }, auth);
+
+    $('#phoneLoginBtn').addEventListener('click', () => {
+        $('#otpModal').style.display = 'flex';
+        $('#phoneInputGroup').style.display = 'block';
+        $('#otpInputGroup').style.display = 'none';
+        $('#sendOtpBtn').style.display = 'block';
+        $('#verifyOtpBtn').style.display = 'none';
+    });
+
+    $('#closeOtpModal').addEventListener('click', (e) => {
+        e.preventDefault();
+        $('#otpModal').style.display = 'none';
+        if (window.recaptchaVerifier) window.recaptchaVerifier.clear();
+    });
+
+    $('#sendOtpBtn').addEventListener('click', async () => {
+        const number = $('#phoneNumber').value.trim();
+        if (!number || number.length < 8) {
+            showLoginToast('Please enter a valid phone number', 'error');
+            return;
+        }
+
+        $('#sendOtpBtn').disabled = true;
+        $('#sendOtpBtn').textContent = 'Sending...';
+
+        try {
+            confirmationResult = await signInWithPhoneNumber(auth, number, window.recaptchaVerifier);
+            showLoginToast('Code sent! Check your phone.', 'success');
+            
+            $('#phoneInputGroup').style.display = 'none';
+            $('#otpInputGroup').style.display = 'block';
+            $('#sendOtpBtn').style.display = 'none';
+            $('#verifyOtpBtn').style.display = 'block';
+        } catch (error) {
+            console.error('Phone Auth Error:', error);
+            showLoginToast('Failed to send SMS: ' + error.message, 'error');
+            $('#sendOtpBtn').disabled = false;
+            $('#sendOtpBtn').textContent = 'Send Code';
+            if (window.recaptchaVerifier) window.recaptchaVerifier.render(); // Reset recaptcha
+        }
+    });
+
+    $('#verifyOtpBtn').addEventListener('click', async () => {
+        const code = $('#otpCode').value.trim();
+        if (code.length !== 6) {
+            showLoginToast('Enter the 6-digit code', 'error');
+            return;
+        }
+
+        $('#verifyOtpBtn').disabled = true;
+        $('#verifyOtpBtn').textContent = 'Verifying...';
+
+        try {
+            await confirmationResult.confirm(code);
+            showLoginToast('Phone verified! Redirecting...', 'success');
+            // Auth observer in login.js will handle redirect
+        } catch (error) {
+            console.error('OTP Verification Error:', error);
+            showLoginToast('Invalid code. Try again.', 'error');
+            $('#verifyOtpBtn').disabled = false;
+            $('#verifyOtpBtn').textContent = 'Verify Code';
+        }
+    });
+}
+
 // === Init ===
 createFloatingPosters();
+setupPhoneAuth();
+

@@ -242,9 +242,14 @@
                     <h3 class="player-title" id="playerTitle">Movie Title</h3>
                     <span class="player-year" id="playerYear">2024</span>
                 </div>
-                <button type="button" class="player-close" id="playerClose" title="Close">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div class="player-header-actions">
+                    <button type="button" class="player-action-btn" id="playerFullscreen" title="Fullscreen">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button type="button" class="player-close" id="playerClose" title="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </div>
             <div class="player-wrapper" id="playerWrapper">
                 <iframe id="moviePlayer" allowfullscreen webkitallowfullscreen mozallowfullscreen allow="autoplay; encrypted-media; fullscreen" frameborder="0"></iframe>
@@ -253,7 +258,7 @@
                     <p>Loading movie...</p>
                 </div>
             </div>
-            <div class="player-controls-bar">
+            <div class="player-controls-bar" style="flex-direction: column; align-items: stretch; gap: 10px;">
                 <div class="server-controls">
                     <span class="server-label">Server:</span>
                     <button type="button" class="server-btn active highlight" data-server="1" id="server1">Server 1 (Auto)</button>
@@ -266,6 +271,12 @@
                     <a id="externalPlayBtn" target="_blank" class="server-btn" style="background: var(--gradient-primary); border: none; color: white; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 700;">
                         <i class="fas fa-external-link-alt" style="margin-right: 6px;"></i> Open in New Window
                     </a>
+                </div>
+                <div class="server-controls" id="audioControls" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+                    <span class="server-label"><i class="fas fa-language"></i> Audio:</span>
+                    <div id="audioTrackContainer" style="display: contents;">
+                        <button type="button" class="server-btn active highlight" data-lang="">Original (Auto)</button>
+                    </div>
                 </div>
             </div>
         </div>

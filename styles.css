@@ -2159,3 +2159,27 @@ button {
     .server-controls { gap: 6px; }
     .server-btn { padding: 6px 12px; font-size: 0.75rem; }
 }
+
+/* === Fullscreen Optimization (Surgical Addition) === */
+.player-container:fullscreen {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    border-radius: 0 !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.player-container:-webkit-full-screen {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    border-radius: 0 !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.player-container:fullscreen .player-wrapper {
+    flex: 1;
+}
+

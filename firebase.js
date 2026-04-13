@@ -28,3 +28,5 @@ window.createUserWithEmailAndPassword = (auth, email, password) => auth.createUs
 window.signInWithEmailAndPassword = (auth, email, password) => auth.signInWithEmailAndPassword(email, password);
 window.signInWithPopup = (auth, provider) => auth.signInWithPopup(provider);
 window.updateProfile = (user, profile) => user.updateProfile(profile);
+window.RecaptchaVerifier = firebase.auth.RecaptchaVerifier;
+window.signInWithPhoneNumber = (auth, number, verifier) => auth.signInWithPhoneNumber(number, verifier);

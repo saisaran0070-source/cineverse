@@ -81,8 +81,11 @@
                 </div>
 
                 <div class="social-login">
-                    <button class="social-btn google" id="googleLoginBtn">
+                    <button class="social-btn google" id="googleLoginBtn" title="Login with Google">
                         <i class="fab fa-google"></i>
+                    </button>
+                    <button class="social-btn phone" id="phoneLoginBtn" title="Login with Phone">
+                        <i class="fas fa-phone"></i>
                     </button>
                     <button class="social-btn github" id="githubLoginBtn">
                         <i class="fab fa-github"></i>
@@ -183,6 +186,39 @@
         <p class="login-footer">
             &copy; 2026 CineVerse. Stream unlimited movies worldwide.
         </p>
+    </div>
+
+    <!-- OTP Modal (Surgical Addition) -->
+    <div id="otpModal" class="player-modal" style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.9);">
+        <div class="auth-card" style="max-width: 400px; padding: 40px; text-align: center;">
+            <h2 class="auth-title">Verify Phone</h2>
+            <p class="auth-subtitle" id="otpSubtitle">Please enter the 6-digit code sent to your phone</p>
+            
+            <div id="recaptcha-container"></div>
+
+            <div class="input-group" id="phoneInputGroup">
+                <div class="input-wrapper">
+                    <i class="fas fa-phone input-icon"></i>
+                    <input type="tel" id="phoneNumber" placeholder="+1234567890" style="background: transparent; border: none; color: white; width: 100%; outline: none;" value="+">
+                </div>
+            </div>
+
+            <div class="input-group" id="otpInputGroup" style="display: none;">
+                <div class="input-wrapper">
+                    <i class="fas fa-key input-icon"></i>
+                    <input type="text" id="otpCode" placeholder="Enter 6-digit code" maxlength="6" style="background: transparent; border: none; color: white; width: 100%; outline: none;">
+                </div>
+            </div>
+
+            <button type="button" class="auth-btn" id="sendOtpBtn">Send Code</button>
+            <button type="button" class="auth-btn" id="verifyOtpBtn" style="display: none;">Verify Code</button>
+            
+            <p class="auth-switch" style="margin-top: 20px;">
+                <a href="#" id="closeOtpModal" style="color: var(--text-muted);">Cancel</a>
+            </p>
+        </div>
+    </div>
+
     <!-- Firebase SDK (Standard version to support local file loading) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
