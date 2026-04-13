@@ -1037,7 +1037,6 @@ function setupFeedbackUI() {
 async function init() {
     setupNavigation();
     setupEventListeners();
-    setupPlatformNav(); // Initialize the new Platform Bar
     
     showToast("Welcome to CineVerse!");
     
