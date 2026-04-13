@@ -650,20 +650,25 @@ async function launchPlayer(movieId, title, year) {
             subBadge.innerHTML = '<i class="fas fa-closed-captioning"></i> Multi-Subtitles Ready';
             statusDiv.appendChild(subBadge);
 
-            // Add Regional Dub Badges
-            if (codes.includes('ta')) {
-                const badge = document.createElement('span');
-                badge.className = 'lang-badge dubbed';
-                badge.innerHTML = '<i class="fas fa-volume-up"></i> Tamil Audio';
-                statusDiv.appendChild(badge);
-            }
-            if (codes.includes('hi')) {
-                const badge = document.createElement('span');
-                badge.className = 'lang-badge dubbed';
-                badge.innerHTML = '<i class="fas fa-volume-up"></i> Hindi Audio';
-                statusDiv.appendChild(badge);
-            }
-            if (codes.length > 5) {
+            // Regional Language Configuration
+            const regionalLangs = [
+                { code: 'ta', label: 'Tamil' },
+                { code: 'hi', label: 'Hindi' },
+                { code: 'te', label: 'Telugu' },
+                { code: 'ml', label: 'Malayalam' },
+                { code: 'kn', label: 'Kannada' }
+            ];
+
+            regionalLangs.forEach(lang => {
+                if (codes.includes(lang.code)) {
+                    const badge = document.createElement('span');
+                    badge.className = 'lang-badge dubbed';
+                    badge.innerHTML = `<i class="fas fa-volume-up"></i> ${lang.label} Audio`;
+                    statusDiv.appendChild(badge);
+                }
+            });
+
+            if (codes.length > 5 && !codes.includes('ta') && !codes.includes('hi')) {
                 const multiBadge = document.createElement('span');
                 multiBadge.className = 'lang-badge';
                 multiBadge.innerHTML = '<i class="fas fa-language"></i> Multi-Audio Info';
