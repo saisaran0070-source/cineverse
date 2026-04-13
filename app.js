@@ -641,6 +641,10 @@ function loadMovieStream(movieId, serverIndex) {
 
     const embedUrl = CONFIG.EMBED_SERVERS[serverIndex](movieId);
     iframe.src = embedUrl;
+    
+    // Update the "Open in New Window" link directly
+    const externalBtn = $('#externalPlayBtn');
+    if (externalBtn) externalBtn.href = embedUrl;
 
     // Show a message inside loading overlay after some time
     let loadTimeout = setTimeout(() => {
@@ -764,15 +768,7 @@ function setupNavigation() {
         });
     });
 
-    $('#externalPlayBtn').addEventListener('click', (e) => {
-        e.preventDefault(); // Stop any accidental page refresh
-        if (currentMovieId) {
-            const url = CONFIG.EMBED_SERVERS[currentServer](currentMovieId);
-            window.open(url, '_blank');
-        } else {
-            showToast("Opening movie in new window...");
-        }
-    });
+    // External link is now handled directly by the <a> tag in HTML for 100% reliability.
 
     $('#playerModal').addEventListener('click', (e) => { if (e.target === $('#playerModal')) closePlayer(); });
 
