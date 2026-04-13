@@ -1011,11 +1011,110 @@ function setupFeedbackUI() {
 }
 
 // === Initialization ===
+// === UI Helpers ===
+function toggleMainSections(show) {
+    const mainSections = ['#heroSection', '#nowPlayingSection', '#trendingSection', '#topRatedSection', '#upcomingSection', '#genreSection', '#languageSection'];
+    mainSections.forEach(s => {
+        const el = $(s);
+        if (el) el.style.display = show ? 'block' : 'none';
+    });
+}
+
+function handleNavSection(section) {
+    section = section.toLowerCase();
+    
+    // Close mobile menu if open
+    const sidebar = $('#sidebar');
+    if (sidebar) sidebar.classList.remove('active');
+    
+    // Hide search results when navigating to a section
+    $('#searchResultsSection').classList.add('hidden');
+    toggleMainSections(true);
+
+    switch (section) {
+        case 'home': window.scrollTo({ top: 0, behavior: 'smooth' }); break;
+        case 'trending': $('#trendingSection').scrollIntoView({ behavior: 'smooth' }); break;
+        case 'toprated': $('#topRatedSection').scrollIntoView({ behavior: 'smooth' }); break;
+        case 'genres': $('#genreSection').scrollIntoView({ behavior: 'smooth' }); break;
+        case 'languages': $('#languageSection').scrollIntoView({ behavior: 'smooth' }); break;
+    }
+}
+
+// === Event Listeners ===
+function setupEventListeners() {
+    // Search
+    const searchInput = $('#searchInput');
+    const searchBtn = $('#searchBtn');
+    if (searchBtn && searchInput) {
+        searchBtn.onclick = () => handleSearch(searchInput.value);
+        searchInput.onkeypress = (e) => { if (e.key === 'Enter') handleSearch(searchInput.value); };
+    }
+
+    // Modal Close
+    const closePlayerBtn = $('#closePlayerBtn');
+    if (closePlayerBtn) closePlayerBtn.onclick = closePlayer;
+
+    const closeDetailBtn = $('#closeDetailBtn');
+    if (closeDetailBtn) closeDetailBtn.onclick = closeDetail;
+
+    // Scroll to Top
+    const scrollTopBtn = $('#scrollTopBtn');
+    if (scrollTopBtn) {
+        scrollTopBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // See All Buttons
+    $$('.see-all-btn').forEach(btn => {
+        btn.onclick = () => {
+            const cat = btn.getAttribute('data-category');
+            loadSeeAll(cat);
+        };
+    });
+
+    // Navigation Links
+    $$('.nav-link').forEach(link => {
+        link.onclick = (e) => {
+            const href = link.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                e.preventDefault();
+                const target = href.substring(1);
+                handleNavSection(target);
+            }
+        };
+    });
+}
+
+async function handleSearch(query) {
+    if (!query.trim()) return;
+    const section = $('#searchResultsSection');
+    const grid = $('#searchResultsGrid');
+    $('#searchResultsTitle').innerHTML = `<i class="fas fa-search"></i> Search Results for "${query}"`;
+    
+    section.classList.remove('hidden');
+    toggleMainSections(false);
+    grid.innerHTML = '';
+    
+    createSkeletons(grid);
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const data = await tmdbFetch('/search/movie', { query: query.trim() });
+    const movies = data?.results || [];
+    
+    grid.innerHTML = '';
+    if (movies.length === 0) {
+        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">No movies found. Try another search!</p>';
+    } else {
+        movies.forEach((m, i) => grid.appendChild(createMovieCard(m, i)));
+    }
+}
+
+// === Initialization ===
 async function init() {
     console.log('🎬 CineVerse initializing...');
     
     // Core setups
     setupNavigation();
+    setupEventListeners();
     setupUserMenu();
     setupFeedbackUI();
     
