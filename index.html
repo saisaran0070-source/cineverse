@@ -254,21 +254,13 @@
                 </div>
             </div>
             <div class="player-controls-bar">
-                <div class="player-guide-container">
-                    <div class="player-guide-item">
-                        <i class="fas fa-volume-up"></i>
-                        <span><b>Audio Track:</b> Click the <b>⚙️ Gear icon</b> in the player to switch to <b>Tamil/Hindi</b> if available.</span>
-                    </div>
-                    <div class="player-guide-item">
-                        <i class="fas fa-closed-captioning"></i>
-                        <span><b>Subtitles:</b> Click the <b>CC</b> button to enable subtitles.</span>
+                <div class="language-selection-area">
+                    <span class="selection-label"><i class="fas fa-language"></i> Change Audio:</span>
+                    <div class="audio-switch-buttons" id="audioSwitchButtons">
+                        <!-- Buttons like [Tamil] [Hindi] will be injected here as clickable buttons -->
                     </div>
                 </div>
                 
-                <div class="language-track-status" id="languageTrackStatus">
-                    <!-- Badges like [Tamil Audio Ready] will be injected here -->
-                </div>
-
                 <div class="server-controls">
                     <span class="server-label">Server:</span>
                     <button class="server-btn active highlight" data-server="1" id="server1">Server 1 (Primary)</button>

@@ -619,16 +619,17 @@ function showAdBlockerTip(onContinue) {
 async function launchPlayer(movieId, title, year) {
     currentMovieId = movieId;
     currentServer = 0;
+    currentAudio = 'en';
 
     $('#playerTitle').textContent = title;
     $('#playerYear').textContent = year;
     $('#playerLoading').classList.remove('hidden');
 
-    // Reset badges
-    const statusDiv = $('#languageTrackStatus');
-    if (statusDiv) statusDiv.innerHTML = '<span style="color:var(--text-muted);font-size:0.7rem;">Checking audio tracks...</span>';
+    const switchContainer = $('#audioSwitchButtons');
+    if (switchContainer) {
+        switchContainer.innerHTML = '<span style="color:var(--text-muted);font-size:0.75rem;">Detecting audio tracks...</span>';
+    }
 
-    // Highlight first server
     $$('.server-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
     loadMovieStream(movieId, 0);
 
@@ -637,66 +638,75 @@ async function launchPlayer(movieId, title, year) {
 
     showToast(`Loading "${title}"...`);
 
-    // Fetch and Show Language Badges
+    // Fetch and Show Language Buttons
     try {
         const data = await tmdbFetch(`/movie/${movieId}/translations`);
-        if (data && data.translations && statusDiv) {
-            statusDiv.innerHTML = '';
+        if (data && data.translations && switchContainer) {
+            switchContainer.innerHTML = '';
             const codes = data.translations.map(t => t.iso_639_1);
             
-            // Add Always-Ready Badge
-            const subBadge = document.createElement('span');
-            subBadge.className = 'lang-badge';
-            subBadge.innerHTML = '<i class="fas fa-closed-captioning"></i> Multi-Subtitles Ready';
-            statusDiv.appendChild(subBadge);
+            // Default Original Button
+            switchContainer.appendChild(createAudioBtn('en', 'English / Original', true));
 
-            // Regional Language Configuration
+            // Regional Selection
             const regionalLangs = [
                 { code: 'ta', label: 'Tamil' },
                 { code: 'hi', label: 'Hindi' },
                 { code: 'te', label: 'Telugu' },
-                { code: 'ml', label: 'Malayalam' },
-                { code: 'kn', label: 'Kannada' }
+                { code: 'ml', label: 'Malayalam' }
             ];
 
             regionalLangs.forEach(lang => {
                 if (codes.includes(lang.code)) {
-                    const badge = document.createElement('span');
-                    badge.className = 'lang-badge dubbed';
-                    badge.innerHTML = `<i class="fas fa-volume-up"></i> ${lang.label} Audio`;
-                    statusDiv.appendChild(badge);
+                    switchContainer.appendChild(createAudioBtn(lang.code, lang.label, false));
                 }
             });
-
-            if (codes.length > 5 && !codes.includes('ta') && !codes.includes('hi')) {
-                const multiBadge = document.createElement('span');
-                multiBadge.className = 'lang-badge';
-                multiBadge.innerHTML = '<i class="fas fa-language"></i> Multi-Audio Info';
-                statusDiv.appendChild(multiBadge);
-            }
-        } else if (statusDiv) {
-             statusDiv.innerHTML = '<span style="color:var(--text-muted);font-size:0.7rem;">Only standard tracks available</span>';
         }
     } catch (e) {
         console.error("Error fetching languages:", e);
     }
 }
 
+function createAudioBtn(code, label, isActive) {
+    const btn = document.createElement('button');
+    btn.className = `audio-btn ${isActive ? 'active' : ''}`;
+    btn.innerHTML = `<i class="fas fa-volume-up"></i> ${label}`;
+    btn.onclick = () => {
+        $$('.audio-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentAudio = code;
+        showToast(`Switching to ${label} track...`);
+        loadMovieStream(currentMovieId, currentServer);
+    };
+    return btn;
+}
+
+let currentAudio = 'en';
+
 function loadMovieStream(movieId, serverIndex) {
     const iframe = $('#moviePlayer');
     const loading = $('#playerLoading');
-
     loading.classList.remove('hidden');
 
-    const embedUrl = CONFIG.EMBED_SERVERS[serverIndex](movieId);
+    let embedUrl = CONFIG.EMBED_SERVERS[serverIndex](movieId);
+    
+    // Add language optimization if regional audio selected
+    if (currentAudio !== 'en') {
+        const separator = embedUrl.includes('?') ? '&' : '?';
+        embedUrl += `${separator}dub=1&lang=${currentAudio}&audio_lang=${currentAudio}`;
+    }
+
     iframe.src = embedUrl;
 
-    // Show a message inside loading overlay after some time
     let loadTimeout = setTimeout(() => {
+        const warning = currentAudio !== 'en' ? 
+            `<p style="font-size:0.8rem;color:var(--accent-gold);margin-top:10px">Searching for <b>${currentAudio.toUpperCase()}</b> audio. If it fails, try <b>Server 2</b>.</p>` :
+            `<p style="font-size:0.8rem;color:var(--text-muted);margin-top:10px">If slow, try switching servers below.</p>`;
+        
         loading.innerHTML = `
             <div class="spinner"></div>
-            <p>Loading movie...</p>
-            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:10px">If the movie doesn't load, try switching servers below.</p>
+            <p>Loading stream...</p>
+            ${warning}
         `;
     }, 3000);
 
@@ -707,14 +717,9 @@ function loadMovieStream(movieId, serverIndex) {
 
     iframe.onerror = () => {
         clearTimeout(loadTimeout);
-        loading.innerHTML = `
-            <i class="fas fa-exclamation-triangle" style="font-size:2rem;color:var(--accent-gold)"></i>
-            <p>Server not responding</p>
-            <p style="font-size:0.8rem;color:var(--text-muted)">Try switching to a different server below</p>
-        `;
+        loading.innerHTML = '<i class="fas fa-exclamation-triangle"></i><p>Server error</p>';
     };
-
-    // Fallback: hide loading after 8 seconds regardless
+    
     setTimeout(() => loading.classList.add('hidden'), 8000);
 }
 
