@@ -1158,13 +1158,42 @@ async function init() {
     }
 }
 
-function loadMainContent() {
-    loadHero();
-    loadNowPlaying();
-    loadTrending();
-    loadTopRated();
-    loadUpcoming();
     loadGenres();
+}
+
+// === Notification Logic ===
+function showToast(message, duration = 3000) {
+    let toast = document.getElementById('toastNotification');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toastNotification';
+        toast.style.cssText = `
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+            background: rgba(18, 18, 42, 0.95); color: white; padding: 12px 24px;
+            border-radius: 50px; font-size: 0.9rem; font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); z-index: 10000;
+            border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center;
+            gap: 10px; animation: slideUpToast 0.3s ease forwards;
+        `;
+        document.body.appendChild(toast);
+
+        // Add keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideUpToast {
+                from { bottom: 80px; opacity: 0; }
+                to { bottom: 100px; opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    toast.innerHTML = `<span>✨</span> ${message}`;
+    toast.style.display = 'flex';
+
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, duration);
 }
 
 document.addEventListener('DOMContentLoaded', init);
