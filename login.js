@@ -263,6 +263,7 @@ $('#signupFormElement').addEventListener('submit', function (e) {
 // === Social Login ===
 $$('.social-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+        if (btn.classList.contains('phone')) return; // Handled by setupPhoneAuth
         if (btn.classList.contains('google')) {
             signInWithPopup(auth, provider)
                 .then((result) => {
@@ -312,12 +313,19 @@ function setupPhoneAuth() {
         }
     }, auth);
 
-    $('#phoneLoginBtn').addEventListener('click', () => {
-        $('#otpModal').style.display = 'flex';
-        $('#phoneInputGroup').style.display = 'block';
-        $('#otpInputGroup').style.display = 'none';
-        $('#sendOtpBtn').style.display = 'block';
-        $('#verifyOtpBtn').style.display = 'none';
+    const phoneBtns = [$('#phoneLoginBtn'), $('#phoneSignupBtn')];
+    
+    phoneBtns.forEach(btn => {
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+            $('#otpModal').style.display = 'flex';
+            $('#phoneInputGroup').style.display = 'block';
+            $('#otpInputGroup').style.display = 'none';
+            $('#sendOtpBtn').style.display = 'block';
+            $('#verifyOtpBtn').style.display = 'none';
+            $('#sendOtpBtn').disabled = false;
+            $('#sendOtpBtn').textContent = 'Send Code';
+        });
     });
 
     $('#closeOtpModal').addEventListener('click', (e) => {
