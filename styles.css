@@ -1835,6 +1835,70 @@ button {
     font-size: 0.8rem;
 }
 
+/* === Platform Navigation === */
+.platform-nav {
+    background: rgba(10, 10, 26, 0.5);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 15px 0;
+    position: sticky;
+    top: 70px; /* Below Main Navbar */
+    z-index: 100;
+}
+
+.platform-items {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.platform-items::-webkit-scrollbar {
+    display: none;
+}
+
+.platform-btn {
+    flex: 0 0 auto;
+    padding: 10px 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    color: var(--text-primary);
+    font-family: var(--font-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.platform-btn i {
+    font-size: 1.1rem;
+    color: var(--pf-color);
+}
+
+.platform-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--pf-color);
+    box-shadow: 0 0 15px rgba(var(--pf-color-rgb, 255, 255, 255), 0.3);
+    transform: translateY(-3px);
+}
+
+.platform-btn.active {
+    background: var(--pf-color);
+    border-color: var(--pf-color);
+    color: #fff;
+}
+
+.platform-btn.active i {
+    color: #fff;
+}
+
+
 /* === Website Feedback UI === */
 .feedback-float-btn {
     position: fixed;

@@ -188,16 +188,43 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
 // === API Helpers ===
-async function tmdbFetch(endpoint, params = {}) {
-    const url = new URL(`${CONFIG.TMDB_BASE}${endpoint}`);
-    url.searchParams.set('api_key', CONFIG.TMDB_API_KEY);
-    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000); // 4 second timeout
-
     try {
         const resp = await fetch(url, { signal: controller.signal });
+        if (!resp.ok) throw new Error(`HTTP error! status: ${resp.ok}`);
+        const data = await resp.json();
+        clearTimeout(timeout);
+        return data;
+    } catch (e) {
+        clearTimeout(timeout);
+        console.warn(`TMDB fetch failed for ${endpoint}:`, e);
+        return null;
+    }
+}
+
+// === Platform Mapping ===
+const PLATFORM_MAP = {
+    netflix: { id: 8, name: 'Netflix', color: '#e50914' },
+    prime: { id: 119, name: 'Amazon Prime', color: '#00a8e1' },
+    hotstar: { id: 122, name: 'JioHotstar', color: '#ffcc00' }
+};
+
+let activePlatform = 'all';
+
+function setupPlatformNav() {
+    $$('.platform-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            $$('.platform-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activePlatform = btn.dataset.platform;
+            
+            showToast(`Loading movies from ${btn.innerText}...`);
+            handleNavSection('home'); // Reload home with filter
+            
+            // Scroll to top of content
+            window.scrollTo({ top: $('#platformNav').offsetTop - 100, behavior: 'smooth' });
+        });
+    });
+}
         clearTimeout(timeout);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         return await resp.json();
@@ -317,10 +344,28 @@ function createSkeletons(container, count = 8) {
 }
 
 // === Load Movie Rows ===
+async function fetchPlatformMovies(endpoint, category) {
+    let params = { page: 1 };
+    
+    // If a platform filter is active, we use the discover endpoint instead of generic lists
+    if (activePlatform !== 'all' && PLATFORM_MAP[activePlatform]) {
+        return await tmdbFetch('/discover/movie', {
+            ...params,
+            with_watch_providers: PLATFORM_MAP[activePlatform].id,
+            watch_region: 'IN', // Priority for India as requested
+            sort_by: 'popularity.desc'
+        });
+    }
+    
+    // Default behavior for "All Movies"
+    return await tmdbFetch(endpoint, params);
+}
+
 async function loadNowPlaying() {
     const c = $('#nowPlayingRow');
+    if (!c) return;
     createSkeletons(c);
-    const data = await tmdbFetch('/movie/now_playing', { page: 1 });
+    const data = await fetchPlatformMovies('/movie/now_playing', 'now_playing');
     const movies = data?.results || getSampleMovies('now_playing');
     c.innerHTML = '';
     movies.forEach((m, i) => c.appendChild(createMovieCard(m, i)));
@@ -328,8 +373,12 @@ async function loadNowPlaying() {
 
 async function loadTrending() {
     const c = $('#trendingRow');
+    if (!c) return;
     createSkeletons(c);
-    const data = await tmdbFetch('/trending/movie/week');
+    
+    // Trending doesn't support with_watch_providers directly in some endpoints, 
+    // so we use discover with a date range for a similar effect
+    const data = await fetchPlatformMovies('/trending/movie/week', 'trending');
     const movies = data?.results || getSampleMovies('trending');
     c.innerHTML = '';
     movies.forEach((m, i) => c.appendChild(createMovieCard(m, i)));
@@ -337,8 +386,9 @@ async function loadTrending() {
 
 async function loadTopRated() {
     const c = $('#topRatedRow');
+    if (!c) return;
     createSkeletons(c);
-    const data = await tmdbFetch('/movie/top_rated', { page: 1 });
+    const data = await fetchPlatformMovies('/movie/top_rated', 'top_rated');
     const movies = data?.results || getSampleMovies('top_rated');
     c.innerHTML = '';
     movies.forEach((m, i) => c.appendChild(createMovieCard(m, i)));
@@ -346,8 +396,9 @@ async function loadTopRated() {
 
 async function loadUpcoming() {
     const c = $('#upcomingRow');
+    if (!c) return;
     createSkeletons(c);
-    const data = await tmdbFetch('/movie/upcoming', { page: 1 });
+    const data = await fetchPlatformMovies('/movie/upcoming', 'upcoming');
     const movies = data?.results || getSampleMovies('upcoming');
     c.innerHTML = '';
     movies.forEach((m, i) => c.appendChild(createMovieCard(m, i)));
@@ -1086,6 +1137,58 @@ function setupFeedbackUI() {
             }
         });
     }
+}
+
+// === Initialization ===
+async function init() {
+    setupNavigation();
+    setupEventListeners();
+    setupPlatformNav(); // Initialize the new Platform Bar
+    
+    showToast("Welcome to CineVerse!");
+    
+    // Check if we have an API key
+    if (!CONFIG.TMDB_API_KEY || CONFIG.TMDB_API_KEY === 'YOUR_TMDB_API_KEY') {
+        showDemoBanner();
+        loadMainContent();
+    } else {
+        try {
+            // Verify API key with a small request
+            const test = await tmdbFetch('/configuration');
+            if (!test) {
+                showDemoBanner();
+                isUsingFallback = true;
+            }
+            loadMainContent();
+        } catch (e) {
+            showDemoBanner();
+            isUsingFallback = true;
+            loadMainContent();
+        }
+    }
+
+    // Auth listener
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            $('#loginNavBtn').style.display = 'none';
+            $('#userProfile').style.display = 'flex';
+            $('#userAvatar').textContent = user.displayName ? user.displayName[0] : (user.email ? user.email[0] : 'U');
+            $('#dropdownName').textContent = user.displayName || 'User';
+            $('#dropdownEmail').textContent = user.email;
+        } else {
+            $('#loginNavBtn').style.display = 'flex';
+            $('#userProfile').style.display = 'none';
+        }
+    });
+}
+
+function loadMainContent() {
+    loadHero();
+    loadNowPlaying();
+    loadTrending();
+    loadTopRated();
+    loadUpcoming();
+    loadGenres();
 }
 
 document.addEventListener('DOMContentLoaded', init);
