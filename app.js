@@ -1182,6 +1182,12 @@ async function init() {
     }
 }
 
+function loadMainContent(shouldScroll = true) {
+    loadHero(shouldScroll);
+    loadNowPlaying();
+    loadTrending();
+    loadTopRated();
+    loadUpcoming();
     loadGenres();
 }
 
