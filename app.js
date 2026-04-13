@@ -10,10 +10,10 @@ const CONFIG = {
     TMDB_BASE: 'https://api.themoviedb.org/3',
     IMG_BASE: 'https://image.tmdb.org/t/p',
     EMBED_SERVERS: [
-        // Primary: Vidsrc (Working perfectly)
-        (id) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
-        // Secondary: Embed.su (Best for Subtitles & Multiple Languages)
+        // Primary: Embed.su (BEST for Subtitles & Multi-Audio)
         (id) => `https://embed.su/embed/movie/${id}`,
+        // Secondary: Vidsrc.me (Working perfectly)
+        (id) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
         // Tertiary: Smashy Stream (Ad-heavy but usually works)
         (id) => `https://player.smashy.stream/movie/${id}`,
         // Fallback: Autoembed
