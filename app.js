@@ -2,7 +2,7 @@
    CineVerse — App Logic
    TMDB API + Embedded Movie Player
    ============================================ */
-import { auth, onAuthStateChanged, signOut } from './firebase.js';
+import { auth, db, collection, addDoc, serverTimestamp, onAuthStateChanged, signOut } from './firebase.js';
 
 const CONFIG = {
     // Replace with your own TMDB API key from https://www.themoviedb.org/settings/api
@@ -854,6 +854,7 @@ async function init() {
     loadGenres();
     loadLanguages();
     setupUserMenu();
+    setupFeedbackUI();
 
     if (isUsingFallback) {
         showDemoBanner();
@@ -915,6 +916,126 @@ function setupUserMenu() {
             if (userProfile) userProfile.style.display = 'none';
         }
     });
+}
+
+// === Website Feedback System ===
+function setupFeedbackUI() {
+    const openBtn = $('#openFeedbackBtn');
+    const modal = $('#feedbackModal');
+    const closeBtn = $('#closeFeedbackBtn');
+    const successView = $('#feedbackSuccess');
+    const contentView = $('.feedback-content');
+    const closeSuccessBtn = $('#closeFeedbackSuccessBtn');
+    const stars = $$('#starRatingContainer i');
+    const submitBtn = $('#submitFeedbackBtn');
+    const commentBox = $('#feedbackComment');
+
+    let currentRating = 0;
+
+    // Open/Close Modal
+    if (openBtn) {
+        openBtn.addEventListener('click', () => {
+            const user = auth.currentUser;
+            if (!user) {
+                showToast("Please login first to rate the website.");
+                return;
+            }
+            modal.classList.add('active');
+            contentView.classList.remove('hidden');
+            successView.classList.add('hidden');
+            commentBox.value = '';
+            currentRating = 0;
+            stars.forEach(s => {
+                s.classList.remove('fas', 'selected');
+                s.classList.add('far');
+            });
+        });
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+    if (closeSuccessBtn) closeSuccessBtn.addEventListener('click', () => modal.classList.remove('active'));
+
+    // Star Selection Logic
+    stars.forEach(star => {
+        star.addEventListener('mouseover', function() {
+            const val = parseInt(this.getAttribute('data-value'));
+            stars.forEach(s => {
+                const sVal = parseInt(s.getAttribute('data-value'));
+                if (sVal <= val) {
+                    s.classList.replace('far', 'fas');
+                    s.classList.add('hovered');
+                } else {
+                    s.classList.replace('fas', 'far');
+                    s.classList.remove('hovered');
+                }
+            });
+        });
+
+        star.addEventListener('mouseout', function() {
+            stars.forEach(s => {
+                s.classList.remove('hovered');
+                const sVal = parseInt(s.getAttribute('data-value'));
+                if (sVal <= currentRating) {
+                    s.classList.replace('far', 'fas');
+                } else {
+                    s.classList.replace('fas', 'far');
+                }
+            });
+        });
+
+        star.addEventListener('click', function() {
+            currentRating = parseInt(this.getAttribute('data-value'));
+            stars.forEach(s => {
+                const sVal = parseInt(s.getAttribute('data-value'));
+                if (sVal <= currentRating) {
+                    s.classList.replace('far', 'fas');
+                    s.classList.add('selected');
+                } else {
+                    s.classList.replace('fas', 'far');
+                    s.classList.remove('selected');
+                }
+            });
+        });
+    });
+
+    // Submitting Feedback
+    if (submitBtn) {
+        submitBtn.addEventListener('click', async () => {
+            if (currentRating === 0) {
+                showToast("Please select a star rating first.");
+                return;
+            }
+
+            const user = auth.currentUser;
+            if (!user) {
+                showToast("You must be logged in.");
+                return;
+            }
+
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+
+            try {
+                // Save to Firestore
+                await addDoc(collection(db, "website_reviews"), {
+                    userId: user.uid,
+                    userName: user.displayName || user.email,
+                    rating: currentRating,
+                    comment: commentBox.value.trim(),
+                    timestamp: serverTimestamp()
+                });
+
+                contentView.classList.add('hidden');
+                successView.classList.remove('hidden');
+            } catch (error) {
+                console.error("Error adding review: ", error);
+                showToast("Failed to submit review. Try again.");
+            } finally {
+                submitBtn.textContent = 'Submit Feedback';
+                submitBtn.disabled = false;
+            }
+        });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', init);

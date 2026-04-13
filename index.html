@@ -389,6 +389,42 @@
         <i class="fas fa-chevron-up"></i>
     </button>
 
+    <!-- Feedback Floating Button -->
+    <button class="feedback-float-btn" id="openFeedbackBtn">
+        <i class="fas fa-comment-dots"></i> Rate Us
+    </button>
+
+    <!-- Feedback Modal -->
+    <div class="feedback-modal" id="feedbackModal">
+        <div class="feedback-container">
+            <button class="feedback-close" id="closeFeedbackBtn">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="feedback-content">
+                <div class="feedback-icon-wrapper">
+                    <i class="fas fa-star" style="color: var(--accent-gold); font-size: 2.5rem;"></i>
+                </div>
+                <h3>Rate CineVerse</h3>
+                <p>We'd love to hear how we're doing!</p>
+                <div class="star-rating-container" id="starRatingContainer">
+                    <i class="far fa-star" data-value="1"></i>
+                    <i class="far fa-star" data-value="2"></i>
+                    <i class="far fa-star" data-value="3"></i>
+                    <i class="far fa-star" data-value="4"></i>
+                    <i class="far fa-star" data-value="5"></i>
+                </div>
+                <textarea id="feedbackComment" placeholder="Tell us what you love or how we can improve..." rows="4"></textarea>
+                <button class="btn btn-primary btn-glow" id="submitFeedbackBtn">Submit Feedback</button>
+            </div>
+            <div class="feedback-success hidden" id="feedbackSuccess">
+                <i class="fas fa-check-circle" style="color: #00f5d4; font-size: 3rem; margin-bottom: 1rem;"></i>
+                <h3>Thank You!</h3>
+                <p>Your feedback has been sent directly to the developer.</p>
+                <button class="btn btn-secondary" id="closeFeedbackSuccessBtn" style="margin-top: 1.5rem;">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="app.js"></script>
 </body>
 </html>
