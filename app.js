@@ -833,30 +833,7 @@ async function loadSeeAll(category) {
     section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// === Initialize ===
-async function init() {
-    console.log('🎬 CineVerse initializing...');
-    setupNavigation();
-
-    await Promise.all([
-        loadHero(),
-        loadNowPlaying(),
-        loadTrending(),
-        loadTopRated(),
-        loadUpcoming(),
-    ]);
-
-    loadGenres();
-    loadLanguages();
-    setupUserMenu();
-    setupFeedbackUI();
-
-    if (isUsingFallback) {
-        showDemoBanner();
-        console.log('⚠️ Running in demo mode with sample data. Get a free API key at https://www.themoviedb.org/settings/api');
-    }
-    console.log('✅ CineVerse loaded successfully');
-}
+// User Menu and Auth logic moved below init.
 
 // === User Menu (Auth) ===
 function setupUserMenu() {
@@ -1035,14 +1012,19 @@ function setupFeedbackUI() {
 
 // === Initialization ===
 async function init() {
+    console.log('🎬 CineVerse initializing...');
+    
+    // Core setups
     setupNavigation();
-    setupEventListeners();
+    setupUserMenu();
+    setupFeedbackUI();
     
     showToast("Welcome to CineVerse!");
     
-    // Check if we have an API key
+    // Check if we have an API key and load content
     if (!CONFIG.TMDB_API_KEY || CONFIG.TMDB_API_KEY === 'YOUR_TMDB_API_KEY') {
         showDemoBanner();
+        isUsingFallback = true;
         loadMainContent();
     } else {
         try {
@@ -1060,19 +1042,9 @@ async function init() {
         }
     }
 
-    // Auth listener
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            $('#loginNavBtn').style.display = 'none';
-            $('#userProfile').style.display = 'flex';
-            $('#userAvatar').textContent = user.displayName ? user.displayName[0] : (user.email ? user.email[0] : 'U');
-            $('#dropdownName').textContent = user.displayName || 'User';
-            $('#dropdownEmail').textContent = user.email;
-        } else {
-            $('#loginNavBtn').style.display = 'flex';
-            $('#userProfile').style.display = 'none';
-        }
-    });
+    if (isUsingFallback) {
+        console.log('⚠️ Running in demo mode with sample data.');
+    }
 }
 
 function loadMainContent() {
