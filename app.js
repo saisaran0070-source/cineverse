@@ -10,20 +10,20 @@ const CONFIG = {
     TMDB_BASE: 'https://api.themoviedb.org/3',
     IMG_BASE: 'https://image.tmdb.org/t/p',
     EMBED_SERVERS: [
-        // Primary: Vidsrc.me (Proven most stable for this site)
+        // Primary: Vidsrc.net (Moved here for maximum stability as requested)
+        (id) => `https://vidsrc.net/embed/movie?tmdb=${id}`,
+        // Secondary: Vidsrc.me 
         (id) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
-        // Secondary: Vidsrc.to (Great UI and subtitle support)
+        // Tertiary: Vidsrc.to 
         (id) => `https://vidsrc.to/embed/movie/${id}`,
-        // Tertiary: SuperEmbed (Good regional audio)
+        // Quaternary: SuperEmbed (Good regional audio)
         (id) => `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
-        // Quaternary: Smashy Stream
+        // Fifth: Smashy Stream
         (id) => `https://player.smashy.stream/movie/${id}`,
-        // Fifth: Vidsrc Pro
+        // Sixth: Vidsrc Pro
         (id) => `https://vidsrc.pro/embed/movie/${id}`,
-        // Sixth: Embed.su
-        (id) => `https://embed.su/embed/movie/${id}`,
-        // Seventh: Vidsrc.net (Moved back here for stability)
-        (id) => `https://vidsrc.net/embed/movie?tmdb=${id}`
+        // Seventh: Embed.su
+        (id) => `https://embed.su/embed/movie/${id}`
     ]
 };
 
@@ -352,24 +352,27 @@ async function loadUpcoming() {
     movies.forEach((m, i) => c.appendChild(createMovieCard(m, i)));
 }
 
-// === Hero Section ===
-async function loadHero() {
-    const data = await tmdbFetch('/movie/popular', { page: 1 });
-    const movies = data?.results || getSampleMovies('popular');
+async function loadHero(shouldScroll = true) {
+    let movies = [];
+    if (!CONFIG.TMDB_API_KEY || isUsingFallback) {
+        movies = getSampleMovies('popular');
+    } else {
+        const data = await tmdbFetch('/movie/popular');
+        movies = data?.results || getSampleMovies('popular');
+    }
+    
+    if (movies.length > 0) {
+        heroMovies = movies.slice(0, 5);
+        renderHero();
+        startHeroSlider();
+        if (shouldScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
 
-    heroMovies = movies.slice(0, 6);
-    const slider = $('#heroSlider');
-    slider.innerHTML = '';
-
-    heroMovies.forEach((_, i) => {
-        const dot = document.createElement('div');
-        dot.className = `hero-dot${i === 0 ? ' active' : ''}`;
-        dot.addEventListener('click', () => setHeroIndex(i));
-        slider.appendChild(dot);
-    });
-
-    setHeroIndex(0);
-    startHeroRotation();
+function renderHero() {
+    const banner = $('#heroSection');
+    if (!banner) return;
+    // Hero rendering logic already handled by renderHero slider
 }
 
 function setHeroIndex(index) {
@@ -1125,13 +1128,13 @@ async function init() {
     setupUserMenu();
     setupFeedbackUI();
     
-    showToast("Welcome to CineVerse!");
+    // showToast("Welcome to CineVerse!"); // Removed to reduce noise on refresh
     
     // Check if we have an API key and load content
     if (!CONFIG.TMDB_API_KEY || CONFIG.TMDB_API_KEY === 'YOUR_TMDB_API_KEY') {
         showDemoBanner();
         isUsingFallback = true;
-        loadMainContent();
+        loadMainContent(false); // Pass false to prevent scrolling
     } else {
         try {
             // Verify API key with a small request
@@ -1140,11 +1143,11 @@ async function init() {
                 showDemoBanner();
                 isUsingFallback = true;
             }
-            loadMainContent();
+            loadMainContent(false); // Pass false to prevent scrolling
         } catch (e) {
             showDemoBanner();
             isUsingFallback = true;
-            loadMainContent();
+            loadMainContent(false); // Pass false to prevent scrolling
         }
     }
 
