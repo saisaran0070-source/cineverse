@@ -627,7 +627,8 @@ async function launchPlayer(movieId, title, year) {
     loadMovieStream(movieId, 0);
 
     $('#playerModal').classList.add('active');
-    document.body.style.overflow = 'hidden';
+    // Removed scroll lock to allow reaching server buttons on mobile
+    // document.body.style.overflow = 'hidden';
 
     showToast(`Loading "${title}"...`);
 }
