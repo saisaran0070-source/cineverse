@@ -370,12 +370,25 @@ async function loadHero(shouldScroll = true) {
 }
 
 function renderHero() {
-    const banner = $('#heroSection');
-    if (!banner) return;
-    // Hero rendering logic already handled by renderHero slider
+    const slider = $('#heroSlider');
+    if (!slider) return;
+    slider.innerHTML = '';
+
+    heroMovies.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = `hero-dot${i === 0 ? ' active' : ''}`;
+        dot.addEventListener('click', () => {
+            setHeroIndex(i);
+            startHeroSlider(); // Reset timer on manual click
+        });
+        slider.appendChild(dot);
+    });
+
+    setHeroIndex(0);
 }
 
 function setHeroIndex(index) {
+    if (!heroMovies || heroMovies.length === 0) return;
     heroIndex = index;
     const movie = heroMovies[index];
     if (!movie) return;
@@ -385,21 +398,29 @@ function setHeroIndex(index) {
     $('#heroTitle').textContent = movie.title;
     $('#heroDescription').textContent = movie.overview
         ? movie.overview.substring(0, 200) + (movie.overview.length > 200 ? '...' : '') : '';
-    $('#heroRating').textContent = movie.vote_average?.toFixed(1) || '--';
-    $('#heroYear').textContent = movie.release_date?.substring(0, 4) || '----';
-    $('#heroLang').textContent = movie.original_language?.toUpperCase() || '--';
+    
+    // Safety check for meta elements
+    const ratingEl = $('#heroRating');
+    const yearEl = $('#heroYear');
+    const langEl = $('#heroLang');
+    if (ratingEl) ratingEl.textContent = movie.vote_average?.toFixed(1) || '--';
+    if (yearEl) yearEl.textContent = movie.release_date?.substring(0, 4) || '----';
+    if (langEl) langEl.textContent = movie.original_language?.toUpperCase() || '--';
 
     $$('.hero-dot').forEach((d, i) => d.classList.toggle('active', i === index));
 
-    $('#heroWatchBtn').onclick = () => {
-        openPlayer(movie.id, movie.title, movie.release_date?.substring(0, 4) || '');
-    };
-    $('#heroInfoBtn').onclick = () => showMovieDetail(movie);
+    const watchBtn = $('#heroWatchBtn');
+    const infoBtn = $('#heroInfoBtn');
+    if (watchBtn) watchBtn.onclick = () => openPlayer(movie.id, movie.title, movie.release_date?.substring(0, 4) || '');
+    if (infoBtn) infoBtn.onclick = () => showMovieDetail(movie);
 }
 
-function startHeroRotation() {
+function startHeroSlider() {
     if (heroInterval) clearInterval(heroInterval);
-    heroInterval = setInterval(() => setHeroIndex((heroIndex + 1) % heroMovies.length), 6000);
+    heroInterval = setInterval(() => {
+        heroIndex = (heroIndex + 1) % heroMovies.length;
+        setHeroIndex(heroIndex);
+    }, 6000);
 }
 
 // === Genre Section ===
@@ -998,8 +1019,11 @@ function setupFeedbackUI() {
             submitBtn.disabled = true;
 
             try {
-                // Save to Firestore using global references for stability
-                const reviewsRef = window.db.collection("website_reviews");
+                // Ensure fresh database link
+                if (!window.db) throw new Error("Database connection is not ready. Please refresh.");
+
+                // Reverting to ORIGINAL collection name 'feedback'
+                const reviewsRef = window.db.collection("feedback");
                 await reviewsRef.add({
                     userId: user.uid,
                     userName: user.displayName || user.email,
@@ -1013,7 +1037,7 @@ function setupFeedbackUI() {
                 showToast("Thank you for your feedback!");
             } catch (error) {
                 console.error("Firebase Review Error: ", error);
-                showToast("Submission failed: " + error.message);
+                showToast("Failed to save review: " + error.message);
             } finally {
                 submitBtn.textContent = 'Submit Feedback';
                 submitBtn.disabled = false;
