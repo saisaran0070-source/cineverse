@@ -12,11 +12,13 @@ const CONFIG = {
     EMBED_SERVERS: [
         // Primary: Vidsrc (Working perfectly)
         (id) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
-        // Secondary: Smashy Stream (Ad-heavy but usually works)
+        // Secondary: Embed.su (Best for Subtitles & Multiple Languages)
+        (id) => `https://embed.su/embed/movie/${id}`,
+        // Tertiary: Smashy Stream (Ad-heavy but usually works)
         (id) => `https://player.smashy.stream/movie/${id}`,
-        // Tertiary: Autoembed
+        // Fallback: Autoembed
         (id) => `https://autoembed.to/movie/tmdb/${id}`,
-        // Fallback: Vidsrc Pro
+        // Fallback 2: Vidsrc Pro
         (id) => `https://vidsrc.pro/embed/movie/${id}`,
         // Custom URL shortcut (for the 'External' button to pop out)
         (id) => `https://vidsrc.net/embed/movie?tmdb=${id}`
