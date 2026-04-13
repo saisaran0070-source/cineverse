@@ -2,7 +2,8 @@
    CineVerse — Login Page Logic
    Firebase Authentication
    ============================================ */
-import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile, provider, signInWithPopup } from './firebase.js';
+// Global variables provided by firebase.js
+
 
 // === DOM Helpers ===
 const $ = (sel) => document.querySelector(sel);

@@ -24,3 +24,7 @@ window.addDoc = async (collRef, data) => collRef.add(data);
 window.serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
 window.signOut = (auth) => auth.signOut();
 window.onAuthStateChanged = (auth, callback) => auth.onAuthStateChanged(callback);
+window.createUserWithEmailAndPassword = (auth, email, password) => auth.createUserWithEmailAndPassword(email, password);
+window.signInWithEmailAndPassword = (auth, email, password) => auth.signInWithEmailAndPassword(email, password);
+window.signInWithPopup = (auth, provider) => auth.signInWithPopup(provider);
+window.updateProfile = (user, profile) => user.updateProfile(profile);
