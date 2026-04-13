@@ -10,20 +10,20 @@ const CONFIG = {
     TMDB_BASE: 'https://api.themoviedb.org/3',
     IMG_BASE: 'https://image.tmdb.org/t/p',
     EMBED_SERVERS: [
-        // Primary: Vidsrc.net (User requested priority as Server 1)
-        (id) => `https://vidsrc.net/embed/movie?tmdb=${id}`,
-        // Secondary: Vidsrc.me (Extremely stable)
+        // Primary: Vidsrc.me (Proven most stable for this site)
         (id) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
-        // Tertiary: Vidsrc.to (Great UI and subtitle support)
+        // Secondary: Vidsrc.to (Great UI and subtitle support)
         (id) => `https://vidsrc.to/embed/movie/${id}`,
-        // Fourth: SuperEmbed
+        // Tertiary: SuperEmbed (Good regional audio)
         (id) => `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
-        // Fifth: Smashy Stream
+        // Quaternary: Smashy Stream
         (id) => `https://player.smashy.stream/movie/${id}`,
-        // Sixth: Vidsrc Pro
+        // Fifth: Vidsrc Pro
         (id) => `https://vidsrc.pro/embed/movie/${id}`,
-        // Seventh: Embed.su
-        (id) => `https://embed.su/embed/movie/${id}`
+        // Sixth: Embed.su
+        (id) => `https://embed.su/embed/movie/${id}`,
+        // Seventh: Vidsrc.net (Moved back here for stability)
+        (id) => `https://vidsrc.net/embed/movie?tmdb=${id}`
     ]
 };
 
