@@ -10,14 +10,14 @@ const CONFIG = {
     TMDB_BASE: 'https://api.themoviedb.org/3',
     IMG_BASE: 'https://image.tmdb.org/t/p',
     EMBED_SERVERS: [
-        // Primary: Super reliable multi-embed
-        (id) => `https://multiembed.mov/?video_id=${id}&tmdb=1`,
-        // Secondary: Vidsrc alternative domain
+        // Primary: Vidsrc (Working perfectly)
         (id) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
-        // Tertiary: Smashy Stream (Ad-heavy but usually works)
+        // Secondary: Smashy Stream (Ad-heavy but usually works)
         (id) => `https://player.smashy.stream/movie/${id}`,
-        // Fallback: Autoembed
+        // Tertiary: Autoembed
         (id) => `https://autoembed.to/movie/tmdb/${id}`,
+        // Fallback: Vidsrc Pro
+        (id) => `https://vidsrc.pro/embed/movie/${id}`,
         // Custom URL shortcut (for the 'External' button to pop out)
         (id) => `https://vidsrc.net/embed/movie?tmdb=${id}`
     ]
