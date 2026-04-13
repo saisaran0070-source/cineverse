@@ -1826,8 +1826,6 @@ button {
     45% { transform: scale(1.3); }
     60% { transform: scale(1); }
 }
-    box-shadow: 0 15px 35px rgba(255, 60, 172, 0.6);
-}
 
 .feedback-modal {
     position: fixed;
