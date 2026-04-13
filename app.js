@@ -759,15 +759,6 @@ function setupNavigation() {
         }
     });
 
-    $('#subtitleToggle').addEventListener('click', function () {
-        this.classList.toggle('active');
-        showToast(this.classList.contains('active') ? 'Subtitles enabled' : 'Subtitles disabled');
-    });
-
-    $('#subtitleLangSelect').addEventListener('change', function () {
-        if (currentMovieId) showToast(`Subtitle language: ${this.options[this.selectedIndex].text}`);
-    });
-
     $('#playerModal').addEventListener('click', (e) => { if (e.target === $('#playerModal')) closePlayer(); });
 
     $('#detailModal').addEventListener('click', (e) => {
