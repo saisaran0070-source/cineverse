@@ -1,7 +1,5 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
+// CineVerse Firebase Configuration
+// Converted to standard script for local file (file://) support
 const firebaseConfig = {
     apiKey: "AIzaSyAlMLhAhPwKgZiTeGWeZiE9MsyrwOc8XIg",
     authDomain: "cineverse-d4485.firebaseapp.com",
@@ -12,10 +10,17 @@ const firebaseConfig = {
     measurementId: "G-K0PK20WK1E"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const provider = new GoogleAuthProvider();
+// Initialize Firebase using the global firebase object from the CDN tags
+firebase.initializeApp(firebaseConfig);
 
-export { auth, db, collection, addDoc, serverTimestamp, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, provider, signInWithPopup };
+// Create global references for the app to use
+window.auth = firebase.auth();
+window.db = firebase.firestore();
+window.provider = new firebase.auth.GoogleAuthProvider();
+
+// Standard Firebase logic aliases
+window.collection = (db, coll) => db.collection(coll);
+window.addDoc = async (collRef, data) => collRef.add(data);
+window.serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
+window.signOut = (auth) => auth.signOut();
+window.onAuthStateChanged = (auth, callback) => auth.onAuthStateChanged(callback);

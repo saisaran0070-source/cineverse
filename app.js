@@ -2,7 +2,7 @@
    CineVerse — App Logic
    TMDB API + Embedded Movie Player
    ============================================ */
-import { auth, db, collection, addDoc, serverTimestamp, onAuthStateChanged, signOut } from './firebase.js';
+// Global Firebase variables are provided by firebase.js
 
 const CONFIG = {
     // Replace with your own TMDB API key from https://www.themoviedb.org/settings/api
