@@ -362,13 +362,19 @@ function setupPhoneAuth() {
             $('#verifyOtpBtn').style.display = 'block';
         } catch (error) {
             console.error('Phone Auth Error:', error);
-            showLoginToast('Failed to send SMS: ' + error.message, 'error');
+            showLoginToast('Connection Issue: ' + error.message, 'error');
+            
+            // RESET BUTTON STATE (Fix for 'Stuck' Button)
             $('#sendOtpBtn').disabled = false;
             $('#sendOtpBtn').textContent = 'Send Code';
+            
             if (window.recaptchaVerifier && window.recaptchaVerifier.render) {
-                window.recaptchaVerifier.render().then(widgetId => {
-                    grecaptcha.reset(widgetId);
-                });
+                try {
+                    const widgetId = await window.recaptchaVerifier.render();
+                    if (typeof grecaptcha !== 'undefined') grecaptcha.reset(widgetId);
+                } catch (e) {
+                    window.recaptchaVerifier = null; // Force re-init on next click
+                }
             }
         }
     });
