@@ -350,7 +350,7 @@ function setupPhoneAuth() {
                 window.recaptchaVerifier = new RecaptchaClass('recaptcha-container', {
                     'size': 'invisible',
                     'callback': (response) => { console.log('reCAPTCHA solved'); }
-                }, auth);
+                });
             }
 
             confirmationResult = await signInWithPhoneNumber(auth, number, window.recaptchaVerifier);
