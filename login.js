@@ -305,20 +305,30 @@ let confirmationResult = null;
 function setupPhoneAuth() {
     if (!$('#phoneLoginBtn')) return;
 
-    // Initialize reCAPTCHA
-    window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
-        'size': 'invisible',
-        'callback': (response) => {
-            // reCAPTCHA solved, allow signInWithPhoneNumber.
+    // Initialize reCAPTCHA (Safely)
+    try {
+        const RecaptchaClass = window.RecaptchaVerifier || (typeof firebase !== 'undefined' ? firebase.auth.RecaptchaVerifier : null);
+        if (RecaptchaClass) {
+            window.recaptchaVerifier = new RecaptchaClass('recaptcha-container', {
+                'size': 'invisible',
+                'callback': (response) => {
+                    console.log('reCAPTCHA verified');
+                }
+            }, auth);
         }
-    }, auth);
+    } catch (e) {
+        console.warn('reCAPTCHA initialization failed:', e);
+    }
 
     const phoneBtns = [$('#phoneLoginBtn'), $('#phoneSignupBtn')];
     
     phoneBtns.forEach(btn => {
         if (!btn) return;
         btn.addEventListener('click', () => {
-            $('#otpModal').style.display = 'flex';
+            const modal = $('#otpModal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+            
             $('#phoneInputGroup').style.display = 'block';
             $('#otpInputGroup').style.display = 'none';
             $('#sendOtpBtn').style.display = 'block';
@@ -330,7 +340,9 @@ function setupPhoneAuth() {
 
     $('#closeOtpModal').addEventListener('click', (e) => {
         e.preventDefault();
-        $('#otpModal').style.display = 'none';
+        const modal = $('#otpModal');
+        modal.classList.remove('active');
+        setTimeout(() => modal.style.display = 'none', 400);
         if (window.recaptchaVerifier) window.recaptchaVerifier.clear();
     });
 
