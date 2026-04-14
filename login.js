@@ -305,21 +305,6 @@ let confirmationResult = null;
 function setupPhoneAuth() {
     if (!$('#phoneLoginBtn')) return;
 
-    // Initialize reCAPTCHA (Safely)
-    try {
-        const RecaptchaClass = window.RecaptchaVerifier || (typeof firebase !== 'undefined' ? firebase.auth.RecaptchaVerifier : null);
-        if (RecaptchaClass) {
-            window.recaptchaVerifier = new RecaptchaClass('recaptcha-container', {
-                'size': 'invisible',
-                'callback': (response) => {
-                    console.log('reCAPTCHA verified');
-                }
-            }, auth);
-        }
-    } catch (e) {
-        console.warn('reCAPTCHA initialization failed:', e);
-    }
-
     const phoneBtns = [$('#phoneLoginBtn'), $('#phoneSignupBtn')];
     
     phoneBtns.forEach(btn => {
@@ -357,6 +342,17 @@ function setupPhoneAuth() {
         $('#sendOtpBtn').textContent = 'Sending...';
 
         try {
+            // Lazy-init reCAPTCHA if not ready (Surgical Fix)
+            if (!window.recaptchaVerifier) {
+                const RecaptchaClass = window.RecaptchaVerifier || (typeof firebase !== 'undefined' ? firebase.auth.RecaptchaVerifier : null);
+                if (!RecaptchaClass) throw new Error('Firebase Auth not ready. Please refresh.');
+                
+                window.recaptchaVerifier = new RecaptchaClass('recaptcha-container', {
+                    'size': 'invisible',
+                    'callback': (response) => { console.log('reCAPTCHA solved'); }
+                }, auth);
+            }
+
             confirmationResult = await signInWithPhoneNumber(auth, number, window.recaptchaVerifier);
             showLoginToast('Code sent! Check your phone.', 'success');
             
@@ -369,7 +365,11 @@ function setupPhoneAuth() {
             showLoginToast('Failed to send SMS: ' + error.message, 'error');
             $('#sendOtpBtn').disabled = false;
             $('#sendOtpBtn').textContent = 'Send Code';
-            if (window.recaptchaVerifier) window.recaptchaVerifier.render(); // Reset recaptcha
+            if (window.recaptchaVerifier && window.recaptchaVerifier.render) {
+                window.recaptchaVerifier.render().then(widgetId => {
+                    grecaptcha.reset(widgetId);
+                });
+            }
         }
     });
 
