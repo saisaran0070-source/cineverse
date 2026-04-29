@@ -7,7 +7,7 @@
 const CONFIG = {
     // Replace with your own TMDB API key from https://www.themoviedb.org/settings/api
     TMDB_API_KEY: 'ee56dd4dd30274ac812e4367b7c62f9a',
-    TMDB_BASE: 'https://api.themoviedb.org/3',
+    TMDB_BASE: 'https://api.tmdb.org/3',
     IMG_BASE: 'https://image.tmdb.org/t/p',
     EMBED_SERVERS: [
         // Primary: Vidsrc.net (Moved here for maximum stability as requested)
