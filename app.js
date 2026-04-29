@@ -10,8 +10,8 @@ const CONFIG = {
     TMDB_BASE: 'https://api.tmdb.org/3',
     IMG_BASE: 'https://image.tmdb.org/t/p',
     EMBED_SERVERS: [
-        // Primary: Vidsrc.net (Moved here for maximum stability as requested)
-        (id) => `https://vidsrc.net/embed/movie?tmdb=${id}`,
+        // Primary: Vidsrc.pm (Unblocked regional mirror)
+        (id) => `https://vidsrc.pm/embed/movie?tmdb=${id}`,
         // Secondary: Vidsrc.me 
         (id) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
         // Tertiary: Vidsrc.to 
