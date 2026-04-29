@@ -10,16 +10,16 @@ const CONFIG = {
     TMDB_BASE: 'https://api.tmdb.org/3',
     IMG_BASE: 'https://image.tmdb.org/t/p',
     EMBED_SERVERS: [
-        // Primary: Vidsrc.pm (Unblocked regional mirror)
+        // Primary: AutoEmbed (Highly reliable, bypasses ISP/Defender blocks)
+        (id) => `https://autoembed.co/movie/tmdb/${id}`,
+        // Secondary: Vidsrc.pm (Unblocked regional mirror)
         (id) => `https://vidsrc.pm/embed/movie?tmdb=${id}`,
-        // Secondary: Vidsrc.me 
+        // Tertiary: Vidsrc.me 
         (id) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
-        // Tertiary: Vidsrc.to 
+        // Quaternary: SuperEmbed Stream
+        (id) => `https://superembed.stream/movie?tmdb=${id}`,
+        // Fifth: Vidsrc.to 
         (id) => `https://vidsrc.to/embed/movie/${id}`,
-        // Quaternary: SuperEmbed (Good regional audio)
-        (id) => `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
-        // Fifth: Smashy Stream
-        (id) => `https://player.smashy.stream/movie/${id}`,
         // Sixth: Vidsrc Pro
         (id) => `https://vidsrc.pro/embed/movie/${id}`,
         // Seventh: Embed.su
