@@ -448,9 +448,9 @@ async function loadGenreMovies(genreId, genreName) {
 
     const data = await tmdbFetch('/discover/movie', { with_genres: genreId, sort_by: 'popularity.desc', page: 1 });
     let movies = data?.results;
-    if (!movies) {
+    if (!movies || movies.length === 0) {
         movies = SAMPLE_MOVIES.popular.filter(m => m.genre_ids?.includes(genreId));
-        if (!movies.length) movies = SAMPLE_MOVIES.popular.slice(0, 8);
+        if (!movies || movies.length === 0) movies = SAMPLE_MOVIES.popular.slice(0, 8);
     }
     movies.forEach((m, i) => grid.appendChild(createMovieCard(m, i)));
 }
@@ -481,10 +481,10 @@ async function loadLanguageMovies(langCode) {
     const data = await tmdbFetch('/discover/movie', { with_original_language: langCode, sort_by: 'popularity.desc', page: 1 });
 
     let movies = data?.results;
-    if (!movies) {
+    if (!movies || movies.length === 0) {
         const langKey = { hi: 'hindi', ko: 'korean', ja: 'japanese' }[langCode];
         movies = SAMPLE_MOVIES[langKey] || SAMPLE_MOVIES.popular.filter(m => m.original_language === langCode);
-        if (!movies.length) movies = SAMPLE_MOVIES.popular.slice(0, 8);
+        if (!movies || movies.length === 0) movies = SAMPLE_MOVIES.popular.slice(0, 8);
     }
     c.innerHTML = '';
     movies.forEach((m, i) => c.appendChild(createMovieCard(m, i)));
