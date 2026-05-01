@@ -1169,6 +1169,28 @@ function setupEventListeners() {
             }
         };
     });
+
+    // 3D Parallax Banner & Glassmorphism Navbar Logic
+    const heroBackdrop = $('#heroBackdrop');
+    const navBar = $('#navbar');
+    
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        
+        // Parallax effect: move background slower than the foreground
+        if (heroBackdrop && scrollY < window.innerHeight) {
+            heroBackdrop.style.transform = `translateY(${scrollY * 0.4}px)`;
+        }
+        
+        // Glassmorphism Navbar toggle
+        if (navBar) {
+            if (scrollY > 50) {
+                navBar.classList.add('scrolled');
+            } else {
+                navBar.classList.remove('scrolled');
+            }
+        }
+    }, { passive: true });
 }
 
 async function handleSearch(query) {
