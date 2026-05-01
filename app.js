@@ -948,7 +948,8 @@ function setupUserMenu() {
     // Firebase Auth Observer
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // Logged in — show avatar, hide login button
+            // Logged in — reveal website, show avatar, hide login button
+            document.body.style.opacity = '1';
             if (loginBtn) loginBtn.style.display = 'none';
             if (userProfile) {
                 userProfile.style.display = 'block';
@@ -960,9 +961,8 @@ function setupUserMenu() {
                 $('#dropdownEmail').textContent = user.email || '';
             }
         } else {
-            // Not logged in — show login button, hide profile
-            if (loginBtn) loginBtn.style.display = 'flex';
-            if (userProfile) userProfile.style.display = 'none';
+            // Not logged in — redirect to login page immediately to lock the website
+            window.location.replace('login.html');
         }
     });
 }
