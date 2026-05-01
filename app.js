@@ -565,6 +565,7 @@ async function showMovieDetail(movie) {
 
     $('#detailWatchBtn').onclick = () => {
         modal.classList.remove('active');
+        addToRecentlyWatched(movie);
         openPlayer(movie.id, movie.title, movie.release_date?.substring(0, 4) || '');
     };
 
@@ -950,6 +951,7 @@ function setupUserMenu() {
         if (user) {
             // Logged in — reveal website, show avatar, hide login button
             document.body.style.opacity = '1';
+            loadRecentlyWatched();
             if (loginBtn) loginBtn.style.display = 'none';
             if (userProfile) {
                 userProfile.style.display = 'block';
@@ -1337,4 +1339,60 @@ document.addEventListener('fullscreenchange', () => {
         btn.innerHTML = document.fullscreenElement ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>';
     }
 });
+
+// === Recently Watched Logic ===
+function getRecentlyWatchedKey() {
+    const uid = window.auth && window.auth.currentUser ? window.auth.currentUser.uid : 'guest';
+    return `cineverse_recent_${uid}`;
+}
+
+function addToRecentlyWatched(movie) {
+    if (!movie || !movie.id) return;
+    const key = getRecentlyWatchedKey();
+    let history = [];
+    try {
+        history = JSON.parse(localStorage.getItem(key)) || [];
+    } catch (e) {
+        history = [];
+    }
+
+    // Remove if already exists (to move to front)
+    history = history.filter(m => m.id !== movie.id);
+    
+    // Add to front
+    history.unshift(movie);
+    
+    // Limit to 15 items
+    if (history.length > 15) {
+        history = history.slice(0, 15);
+    }
+    
+    localStorage.setItem(key, JSON.stringify(history));
+    loadRecentlyWatched(); // Refresh the row instantly
+}
+
+function loadRecentlyWatched() {
+    const key = getRecentlyWatchedKey();
+    let history = [];
+    try {
+        history = JSON.parse(localStorage.getItem(key)) || [];
+    } catch (e) {
+        history = [];
+    }
+
+    const section = $('#recentlyWatchedSection');
+    const row = $('#recentlyWatchedRow');
+    if (!section || !row) return;
+
+    if (history.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    section.style.display = 'block';
+    row.innerHTML = '';
+    history.forEach((m, i) => {
+        row.appendChild(createMovieCard(m, i));
+    });
+}
 
