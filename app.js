@@ -72,27 +72,41 @@ const LANGUAGES = [
 // =============================================================
 // Generate an SVG poster placeholder that looks like a real poster
 // =============================================================
+function escapeXml(unsafe) {
+    return (unsafe || 'Movie').replace(/[<>&'"]/g, function (c) {
+        switch (c) {
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '&': return '&amp;';
+            case '\'': return '&apos;';
+            case '"': return '&quot;';
+        }
+    });
+}
+
 function generatePosterSvg(title, color1, color2) {
     const c1 = color1 || '#ff3cac';
     const c2 = color2 || '#784ba0';
-    const encoded = encodeURIComponent(title || 'Movie');
-    return `data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='500' height='750' viewBox='0 0 500 750'>
+    const escaped = escapeXml(title);
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='500' height='750' viewBox='0 0 500 750'>
       <defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='${c1}'/><stop offset='100%' stop-color='${c2}'/></linearGradient></defs>
-      <rect width='500' height='750' fill='url(%23g)'/>
-      <text x='250' y='340' font-family='Arial,sans-serif' font-size='36' fill='white' text-anchor='middle' font-weight='bold'>${encoded}</text>
+      <rect width='500' height='750' fill='url(#g)'/>
+      <text x='250' y='340' font-family='Arial,sans-serif' font-size='36' fill='white' text-anchor='middle' font-weight='bold'>${escaped}</text>
       <text x='250' y='400' font-family='Arial,sans-serif' font-size='50' fill='rgba(255,255,255,0.3)' text-anchor='middle'>🎬</text>
-    </svg>`)}`;
+    </svg>`;
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
 function generateBackdropSvg(title, color1, color2) {
     const c1 = color1 || '#0a0a1a';
     const c2 = color2 || '#1a1a3e';
-    const encoded = encodeURIComponent(title || 'Movie');
-    return `data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080' viewBox='0 0 1920 1080'>
+    const escaped = escapeXml(title);
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080' viewBox='0 0 1920 1080'>
       <defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='${c1}'/><stop offset='100%' stop-color='${c2}'/></linearGradient></defs>
-      <rect width='1920' height='1080' fill='url(%23g)'/>
-      <text x='960' y='540' font-family='Arial,sans-serif' font-size='60' fill='rgba(255,255,255,0.15)' text-anchor='middle' font-weight='bold'>${encoded}</text>
-    </svg>`)}`;
+      <rect width='1920' height='1080' fill='url(#g)'/>
+      <text x='960' y='540' font-family='Arial,sans-serif' font-size='60' fill='rgba(255,255,255,0.15)' text-anchor='middle' font-weight='bold'>${escaped}</text>
+    </svg>`;
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
 // === Sample Data with gradient colors for posters ===
