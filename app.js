@@ -5,8 +5,7 @@
 // Global Firebase variables are provided by firebase.js
 
 const CONFIG = {
-    // Replace with your own TMDB API key from https://www.themoviedb.org/settings/api
-    TMDB_API_KEY: 'ee56dd4dd30274ac812e4367b7c62f9a',
+    // TMDB API requests are now routed securely through our Vercel Serverless Function (/api/tmdb)
     TMDB_BASE: 'https://api.tmdb.org/3',
     IMG_BASE: 'https://image.tmdb.org/t/p',
     EMBED_SERVERS: [
@@ -189,8 +188,8 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
 async function tmdbFetch(endpoint, params = {}) {
-    const url = new URL(`${CONFIG.TMDB_BASE}${endpoint}`);
-    url.searchParams.set('api_key', CONFIG.TMDB_API_KEY);
+    const url = new URL(window.location.origin + '/api/tmdb');
+    url.searchParams.set('endpoint', endpoint);
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
     const controller = new AbortController();
@@ -355,7 +354,7 @@ async function loadUpcoming() {
 
 async function loadHero(shouldScroll = true) {
     let movies = [];
-    if (!CONFIG.TMDB_API_KEY || isUsingFallback) {
+    if (isUsingFallback) {
         movies = getSampleMovies('popular');
     } else {
         const data = await tmdbFetch('/movie/popular');
@@ -664,8 +663,8 @@ async function launchPlayer(movieId, title, year) {
             loadMovieStream(currentMovieId, currentServer);
             showToast('Audio set to Original');
         });
-
-        if (CONFIG.TMDB_API_KEY && !isUsingFallback) {
+        // If we are not using fallback, load full TMDB details
+        if (!isUsingFallback) {
             tmdbFetch(`/movie/${movieId}`).then(details => {
                 if (details && details.spoken_languages && details.spoken_languages.length > 0) {
                     details.spoken_languages.forEach(lang => {
@@ -1231,26 +1230,19 @@ async function init() {
     
     // showToast("Welcome to CineVerse!"); // Removed to reduce noise on refresh
     
-    // Check if we have an API key and load content
-    if (!CONFIG.TMDB_API_KEY || CONFIG.TMDB_API_KEY === 'YOUR_TMDB_API_KEY') {
-        showDemoBanner();
-        isUsingFallback = true;
-        loadMainContent(false); // Pass false to prevent scrolling
-    } else {
-        try {
-            // Verify API key with a small request
-            const test = await tmdbFetch('/configuration');
-            if (!test) {
-                showDemoBanner();
-                isUsingFallback = true;
-            }
-            loadMainContent(false); // Pass false to prevent scrolling
-        } catch (e) {
+    // Check if the backend is configured with an API key
+    try {
+        // Verify API key with a small request to our backend
+        const test = await tmdbFetch('/configuration');
+        if (!test) {
             showDemoBanner();
             isUsingFallback = true;
-            loadMainContent(false); // Pass false to prevent scrolling
         }
+    } catch (e) {
+        showDemoBanner();
+        isUsingFallback = true;
     }
+    loadMainContent(false); // Pass false to prevent scrolling
 
     if (isUsingFallback) {
         console.log('⚠️ Running in demo mode with sample data.');
