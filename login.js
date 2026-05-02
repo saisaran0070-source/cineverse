@@ -406,3 +406,28 @@ function setupPhoneAuth() {
 createFloatingPosters();
 setupPhoneAuth();
 
+// === 3D Tilt Effect ===
+const authCard = $('.auth-card');
+const loginContainer = $('.login-container');
+
+if (authCard && loginContainer) {
+    loginContainer.addEventListener('mousemove', (e) => {
+        const rect = loginContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        // Max tilt of 12 degrees
+        const rotateX = ((y - centerY) / centerY) * -12;
+        const rotateY = ((x - centerX) / centerX) * 12;
+        
+        authCard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+    
+    loginContainer.addEventListener('mouseleave', () => {
+        authCard.style.transform = `rotateX(0deg) rotateY(0deg)`;
+    });
+}
+
