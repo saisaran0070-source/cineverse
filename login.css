@@ -116,30 +116,37 @@ body {
 .strip-1 { left: 10%; transform: rotate(-5deg); }
 .strip-2 { right: 10%; transform: rotate(5deg); }
 
-/* === Floating Posters === */
+/* === Floating Objects === */
 .floating-posters {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
     z-index: 0;
     pointer-events: none;
+    perspective: 1000px;
 }
 
-.floating-poster {
+.floating-object {
     position: absolute;
-    width: 80px;
-    height: 120px;
-    border-radius: 8px;
-    opacity: 0.08;
-    animation: floatPoster 30s linear infinite;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+    opacity: 0.15;
+    animation: floatObject 30s linear infinite;
+    filter: drop-shadow(0 0 10px currentColor);
 }
 
-@keyframes floatPoster {
-    0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
-    10% { opacity: 0.08; }
-    90% { opacity: 0.08; }
-    100% { transform: translateY(-120px) rotate(360deg); opacity: 0; }
+@keyframes floatObject {
+    0% { 
+        transform: translateY(110vh) translateX(0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(0.5); 
+        opacity: 0; 
+    }
+    10% { opacity: 0.25; }
+    50% { 
+        transform: translateY(50vh) translateX(50px) rotateX(180deg) rotateY(90deg) rotateZ(180deg) scale(1.2); 
+    }
+    90% { opacity: 0.25; }
+    100% { 
+        transform: translateY(-20vh) translateX(-50px) rotateX(360deg) rotateY(180deg) rotateZ(360deg) scale(0.5); 
+        opacity: 0; 
+    }
 }
 
 /* === Login Container === */

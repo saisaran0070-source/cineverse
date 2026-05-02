@@ -16,24 +16,39 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// === Floating Posters Background ===
-function createFloatingPosters() {
+// === Floating 3D Objects Background ===
+function createFloatingObjects() {
     const container = $('#floatingPosters');
+    if (!container) return;
+    
+    container.innerHTML = ''; // Clear existing
+    
+    const icons = ['fa-film', 'fa-ticket-alt', 'fa-star', 'fa-video', 'fa-clapperboard', 'fa-popcorn', 'fa-glasses'];
     const colors = [
-        ['#ff3cac', '#784ba0'], ['#00f5d4', '#2b86c5'], ['#ffd700', '#ff6b35'],
-        ['#e74c3c', '#c0392b'], ['#8b5cf6', '#a855f7'], ['#f72585', '#b5179e'],
-        ['#141e30', '#243b55'], ['#a8ff78', '#78ffd6'], ['#ff416c', '#ff4b2b'],
+        '#ff3cac', '#00f5d4', '#ffd700', '#e74c3c', '#8b5cf6', '#f72585', '#a8ff78'
     ];
 
-    for (let i = 0; i < 8; i++) {
-        const poster = document.createElement('div');
-        poster.className = 'floating-poster';
-        const [c1, c2] = colors[i % colors.length];
-        poster.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
-        poster.style.left = `${Math.random() * 90 + 5}%`;
-        poster.style.animationDuration = `${20 + Math.random() * 20}s`;
-        poster.style.animationDelay = `${Math.random() * 15}s`;
-        container.appendChild(poster);
+    for (let i = 0; i < 12; i++) {
+        const obj = document.createElement('i');
+        // Randomly select icon and color
+        const iconClass = icons[Math.floor(Math.random() * icons.length)];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        
+        obj.className = `fas ${iconClass} floating-object`;
+        obj.style.color = color;
+        obj.style.textShadow = `0 0 20px ${color}`;
+        
+        // Randomize size, position, and animation
+        const size = Math.random() * 40 + 20; // 20px to 60px
+        obj.style.fontSize = `${size}px`;
+        obj.style.left = `${Math.random() * 90 + 5}%`;
+        obj.style.animationDuration = `${15 + Math.random() * 25}s`;
+        obj.style.animationDelay = `${Math.random() * 10}s`;
+        
+        // Random 3D rotation start
+        obj.style.transform = `translateZ(${Math.random() * 100 - 50}px)`;
+        
+        container.appendChild(obj);
     }
 }
 
@@ -403,7 +418,7 @@ function setupPhoneAuth() {
 }
 
 // === Init ===
-createFloatingPosters();
+createFloatingObjects();
 setupPhoneAuth();
 
 // === 3D Tilt Effect ===
