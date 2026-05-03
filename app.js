@@ -1242,8 +1242,6 @@ async function init() {
     setupUserMenu();
     setupFeedbackUI();
     
-    // showToast("Welcome to CineVerse!"); // Removed to reduce noise on refresh
-    
     // Check if the backend is configured with an API key
     try {
         // Verify API key with a small request to our backend
@@ -1260,6 +1258,17 @@ async function init() {
 
     if (isUsingFallback) {
         console.log('⚠️ Running in demo mode with sample data.');
+    }
+
+    // Dismiss cinematic loading screen after animation completes
+    const cinemaLoader = document.getElementById('cinemaLoader');
+    if (cinemaLoader) {
+        setTimeout(() => {
+            cinemaLoader.classList.add('fade-out');
+            setTimeout(() => {
+                cinemaLoader.remove();
+            }, 600); // Match the CSS transition duration
+        }, 3200); // Total animation time: reel + logo + tagline + progress bar
     }
 }
 
