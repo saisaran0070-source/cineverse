@@ -1314,7 +1314,7 @@ async function init() {
             setTimeout(() => {
                 cinemaLoader.remove();
             }, 600);
-        }, 2200); // Fast but cinematic
+        }, 3500); // Give enough time for the pulsing animation to play
     }
 }
 
