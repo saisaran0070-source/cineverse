@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0a0e17"/>
+      <stop offset="100%" stop-color="#12122a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="45%">
+      <stop offset="0%" stop-color="rgba(255,60,172,0.18)"/>
+      <stop offset="50%" stop-color="rgba(0,245,212,0.08)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    <linearGradient id="film" x1="35.84" y1="37.120000000000005" x2="92.16" y2="80.64000000000001" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ff3cac"/>
+      <stop offset="50%" stop-color="#784ba0"/>
+      <stop offset="100%" stop-color="#00f5d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="25.6" fill="url(#bg)"/>
+  <rect width="128" height="128" rx="25.6" fill="url(#glow)"/>
+  <rect x="35.84" y="37.120000000000005" width="56.32" height="43.52" rx="3.84" fill="url(#film)"/>
+  <rect x="41.472" y="39.68000000000001" width="4.096" height="5.324800000000001" rx="1" fill="rgba(10,14,23,0.7)"/><rect x="49.51771428571429" y="39.68000000000001" width="4.096" height="5.324800000000001" rx="1" fill="rgba(10,14,23,0.7)"/><rect x="57.563428571428574" y="39.68000000000001" width="4.096" height="5.324800000000001" rx="1" fill="rgba(10,14,23,0.7)"/><rect x="65.60914285714287" y="39.68000000000001" width="4.096" height="5.324800000000001" rx="1" fill="rgba(10,14,23,0.7)"/><rect x="73.65485714285715" y="39.68000000000001" width="4.096" height="5.324800000000001" rx="1" fill="rgba(10,14,23,0.7)"/><rect x="81.70057142857144" y="39.68000000000001" width="4.096" height="5.324800000000001" rx="1" fill="rgba(10,14,23,0.7)"/>
+  <rect x="41.472" y="72.75520000000002" width="4.096" height="5.324800000000001" rx="1" fill="rgba(10,14,23,0.7)"/><rect x="49.51771428571429" y="72.75520000000002" width="4.096" height="5.324800000000001" rx="1" fill="rgba(10,14,23,0.7)"/><rect x="57.563428571428574" y="72.75520000000002" width="4.096" height="5.324800000000001" rx="1" fill="rgba(10,14,23,0.7)"/><rect x="65.60914285714287" y="72.75520000000002" width="4.096" height="5.324800000000001" rx="1" fill="rgba(10,14,23,0.7)"/><rect x="73.65485714285715" y="72.75520000000002" width="4.096" height="5.324800000000001" rx="1" fill="rgba(10,14,23,0.7)"/><rect x="81.70057142857144" y="72.75520000000002" width="4.096" height="5.324800000000001" rx="1" fill="rgba(10,14,23,0.7)"/>
+  <polygon points="59.392,47.36 59.392,70.4 73.216,58.88" fill="rgba(255,255,255,0.95)"/>
+  <text x="64" y="99.84" font-family="Arial,Helvetica,sans-serif" font-size="16.64" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">CV</text>
+</svg>
