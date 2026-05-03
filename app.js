@@ -1267,8 +1267,8 @@ async function init() {
             cinemaLoader.classList.add('fade-out');
             setTimeout(() => {
                 cinemaLoader.remove();
-            }, 600); // Match the CSS transition duration
-        }, 3200); // Total animation time: reel + logo + tagline + progress bar
+            }, 600);
+        }, 2200); // Fast but cinematic
     }
 }
 

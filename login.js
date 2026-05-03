@@ -12,9 +12,23 @@ const $$ = (sel) => document.querySelectorAll(sel);
 // === Check if already logged in ===
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        window.location.href = 'index.html';
+        window.location.replace('index.html');
     }
 });
+
+// Prefetch main page resources for faster redirect
+const prefetchLink = document.createElement('link');
+prefetchLink.rel = 'prefetch';
+prefetchLink.href = 'index.html';
+document.head.appendChild(prefetchLink);
+const prefetchCSS = document.createElement('link');
+prefetchCSS.rel = 'prefetch';
+prefetchCSS.href = 'styles.css';
+document.head.appendChild(prefetchCSS);
+const prefetchJS = document.createElement('link');
+prefetchJS.rel = 'prefetch';
+prefetchJS.href = 'app.js';
+document.head.appendChild(prefetchJS);
 
 // === Floating 3D Objects Background ===
 function createFloatingObjects() {
@@ -280,14 +294,20 @@ $$('.social-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         if (btn.classList.contains('phone')) return; // Handled by setupPhoneAuth
         if (btn.classList.contains('google')) {
+            btn.style.opacity = '0.6';
+            btn.style.pointerEvents = 'none';
             signInWithPopup(auth, provider)
                 .then((result) => {
-                    showLoginToast('Google Login successful!', 'success');
-                    // Auth observer will redirect
+                    showLoginToast('Welcome! Redirecting...', 'success');
+                    window.location.replace('index.html');
                 })
                 .catch((error) => {
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
                     console.error("Google Auth Error:", error);
-                    showLoginToast(`Google Error: ${error.code} - ${error.message}`, 'error');
+                    if (error.code !== 'auth/popup-closed-by-user') {
+                        showLoginToast(`Google Error: ${error.message}`, 'error');
+                    }
                 });
         } else {
             const tempProvider = btn.classList.contains('github') ? 'GitHub' : 'Twitter';
