@@ -446,6 +446,10 @@ button {
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
+.navbar.nav-hidden {
+    transform: translateY(-100%);
+}
+
 .nav-container {
     max-width: 1440px;
     margin: 0 auto;
