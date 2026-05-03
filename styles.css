@@ -883,9 +883,11 @@ html {
     overflow: hidden;
     background: var(--bg-card);
     border: 1px solid var(--border-glass);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s ease, box-shadow 0.4s ease;
     animation: fadeIn 0.6s ease forwards;
     opacity: 0;
+    transform-style: preserve-3d;
+    will-change: transform;
 }
 
 @keyframes fadeIn {
@@ -893,9 +895,8 @@ html {
 }
 
 .movie-card:hover {
-    transform: translateY(-10px) scale(1.03);
     border-color: var(--accent-primary);
-    box-shadow: 0 15px 40px rgba(255, 60, 172, 0.2), 0 0 0 1px var(--accent-primary);
+    box-shadow: 0 25px 50px rgba(255, 60, 172, 0.3), 0 0 0 1px var(--accent-primary);
     z-index: 10;
 }
 
@@ -903,6 +904,29 @@ html {
     position: relative;
     aspect-ratio: 2/3;
     overflow: hidden;
+    transform: translateZ(20px); /* Lift poster in 3D space */
+}
+
+/* 3D Glare Effect */
+.glare-container {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    overflow: hidden;
+    pointer-events: none;
+    border-radius: var(--card-radius);
+}
+
+.glare {
+    position: absolute;
+    width: 250%;
+    height: 250%;
+    top: -75%;
+    left: -75%;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.5) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    mix-blend-mode: overlay;
 }
 
 .movie-card-poster img {
@@ -912,8 +936,10 @@ html {
     transition: transform 0.6s ease;
 }
 
+/* Remove CSS hover scale since JS handles the scale in 3D now */
 .movie-card:hover .movie-card-poster img {
-    transform: scale(1.1);
+    /* Optional: very slight internal scale */
+    transform: scale(1.02);
 }
 
 .movie-card-overlay {

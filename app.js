@@ -288,6 +288,7 @@ function createMovieCard(movie, index = 0) {
 
     card.innerHTML = `
         <div class="movie-card-poster">
+            <div class="glare-container"><div class="glare"></div></div>
             <img src="${posterSrc}" alt="${movie.title}" loading="lazy">
             <div class="movie-card-overlay">
                 <button class="card-play-btn" data-id="${movie.id}" data-title="${movie.title}" data-year="${year}">
@@ -314,6 +315,51 @@ function createMovieCard(movie, index = 0) {
         } else {
             showMovieDetail(movie);
         }
+    });
+
+    // 3D Parallax Apple TV Effect
+    card.addEventListener('mouseenter', () => {
+        card.style.transition = 'none'; // Remove transition for instant tracking
+    });
+
+    card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left; // x position within the element
+        const y = e.clientY - rect.top;  // y position within the element
+
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = ((y - centerY) / centerY) * -15; // Max 15deg rotation
+        const rotateY = ((x - centerX) / centerX) * 15;
+
+        // Apply 3D rotation
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+        
+        // Move glare opposite to mouse
+        const glareX = (x / rect.width) * 100;
+        const glareY = (y / rect.height) * 100;
+        const glare = card.querySelector('.glare');
+        if (glare) {
+            glare.style.transform = `translate(${glareX}%, ${glareY}%)`;
+            glare.style.opacity = '1';
+        }
+    });
+
+    card.addEventListener('mouseleave', () => {
+        // Restore smooth transition for reset
+        card.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)';
+        card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+        
+        const glare = card.querySelector('.glare');
+        if (glare) {
+            glare.style.opacity = '0';
+        }
+        
+        // Remove inline transition after it finishes so CSS hover works again
+        setTimeout(() => {
+            card.style.transition = '';
+        }, 500);
     });
 
     return card;
