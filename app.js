@@ -256,24 +256,6 @@ function getMovieBackdrop(movie) {
     return generateBackdropSvg(movie.title);
 }
 
-// === Show Demo Banner ===
-function showDemoBanner() {
-    if ($('#demoBanner')) return;
-    const banner = document.createElement('div');
-    banner.id = 'demoBanner';
-    banner.style.cssText = `
-        position: fixed; top: 72px; left: 0; right: 0; z-index: 999;
-        background: linear-gradient(135deg, rgba(255,60,172,0.15), rgba(120,75,160,0.15));
-        backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,60,172,0.3);
-        padding: 10px 20px; text-align: center; font-size: 0.85rem; color: rgba(255,255,255,0.8);
-    `;
-    banner.innerHTML = `
-        <span style="color:#ffd700">⚠️</span> <strong>Demo Mode</strong> — API key expired. Showing sample data.
-        <a href="https://www.themoviedb.org/settings/api" target="_blank" style="color:#00f5d4;text-decoration:underline;margin-left:8px">Get free API key →</a>
-        <button onclick="this.parentElement.remove()" style="margin-left:12px;background:none;border:1px solid rgba(255,255,255,0.2);color:white;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:0.75rem">✕</button>
-    `;
-    document.body.appendChild(banner);
-}
 
 // === Create Movie Card ===
 function createMovieCard(movie, index = 0) {
@@ -1293,17 +1275,15 @@ async function init() {
         // Verify API key with a small request to our backend
         const test = await tmdbFetch('/configuration');
         if (!test) {
-            showDemoBanner();
             isUsingFallback = true;
         }
     } catch (e) {
-        showDemoBanner();
         isUsingFallback = true;
     }
     loadMainContent(false); // Pass false to prevent scrolling
 
     if (isUsingFallback) {
-        console.log('⚠️ Running in demo mode with sample data.');
+        console.log('⚠️ Running locally or backend failed. Using offline sample data.');
     }
 
     // Dismiss cinematic loading screen after animation completes
