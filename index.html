@@ -34,6 +34,17 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('PWA SW registered', reg.scope))
+                    .catch(err => console.warn('PWA SW failed:', err));
+            });
+        }
+    </script>
 </head>
 <body style="opacity: 0; transition: opacity 0.3s ease;">
     <!-- Cinematic Loading Screen -->
