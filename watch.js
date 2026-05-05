@@ -150,7 +150,7 @@ function listenForWatchRequests() {
     const user = auth.currentUser;
     if (!user) return;
 
-    // Listen for invitations SENT TO ME
+    // 1. Listen for invitations SENT TO ME (Guest side)
     db.collection('watch_sessions')
         .where('guestId', '==', user.uid)
         .where('status', '==', 'pending')
@@ -161,22 +161,31 @@ function listenForWatchRequests() {
                     showWatchRequestToast(change.doc.id, data);
                 }
             });
-        });
+        }, err => console.error("Guest listener error:", err));
 
-    // Listen for invitations I SENT (to auto-start when they accept)
+    // 2. Listen for invitations I SENT (Host side - to auto-start when they accept)
     db.collection('watch_sessions')
         .where('hostId', '==', user.uid)
-        .where('status', '==', 'active')
         .onSnapshot(snapshot => {
             snapshot.docChanges().forEach(change => {
-                if (change.type === 'modified') {
-                    const sessionId = change.doc.id;
-                    if (!document.getElementById('watchPartyOverlay')?.classList.contains('active')) {
-                        startWatchParty(sessionId);
+                const data = change.doc.data();
+                const sessionId = change.doc.id;
+                
+                // If friend accepted, force open the room if not already in it
+                if (data.status === 'active' && !document.getElementById('watchPartyOverlay')?.classList.contains('active')) {
+                    console.log("Friend accepted! Launching theater...");
+                    startWatchParty(sessionId);
+                }
+                
+                // If friend declined or session ended
+                if (change.type === 'removed') {
+                    if (currentWatchSession?.id === sessionId) {
+                        showToast("Watch session ended.");
+                        endWatchParty();
                     }
                 }
             });
-        });
+        }, err => console.error("Host listener error:", err));
 }
 
 function showWatchRequestToast(sessionId, data) {
