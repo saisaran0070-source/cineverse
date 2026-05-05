@@ -197,63 +197,54 @@ let heroIndex = 0;
 let heroInterval = null;
 let isUsingFallback = false;
 
-// === DOM Elements ===
+// === DOM Helpers ===
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
+// === TMDB API Fetcher ===
 async function tmdbFetch(endpoint, params = {}) {
-    const url = new URL(window.location.origin + '/api/tmdb');
-    url.searchParams.set('endpoint', endpoint);
+    let url;
+    
+    // If we've already detected we should use fallback, go direct
+    if (isUsingFallback) {
+        url = new URL(`${CONFIG.TMDB_BASE}${endpoint}`);
+        url.searchParams.append('api_key', 'AIzaSyAlMLhAhPwKgZiTeGWeZiE9MsyrwOc8XIg'); // Fallback Key
+    } else {
+        // Try the secure proxy first
+        url = new URL(window.location.origin + '/api/tmdb');
+        url.searchParams.set('endpoint', endpoint);
+    }
+
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), 6000);
 
     try {
         const resp = await fetch(url, { signal: controller.signal });
-        if (!resp.ok) throw new Error(`HTTP error! status: ${resp.ok}`);
+        if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
         const data = await resp.json();
         clearTimeout(timeout);
         return data;
     } catch (e) {
         clearTimeout(timeout);
-        console.warn(`TMDB fetch failed for ${endpoint}:`, e);
+        console.warn(`TMDB fetch failed for ${endpoint}. Switching to fallback mode.`);
+        isUsingFallback = true; // Set global flag for next requests
         return null;
     }
 }
 
-// Image URL helpers — handles both TMDB paths (from API) and our generated SVGs (from sample data)
-function imgUrl(movie, size = 'w500') {
-    // If movie has a custom poster URL (sample data), use it
-    if (movie && movie._posterUrl) return movie._posterUrl;
-    // If it's a TMDB path string
-    if (typeof movie === 'string') {
-        if (!movie) return generatePosterSvg('Movie');
-        return `${CONFIG.IMG_BASE}/${size}${movie}`;
-    }
-    return generatePosterSvg('Movie');
-}
-
-function backdropUrl(movie) {
-    if (movie && movie._backdropUrl) return movie._backdropUrl;
-    if (typeof movie === 'string') {
-        if (!movie) return generateBackdropSvg('CineVerse');
-        return `${CONFIG.IMG_BASE}/original${movie}`;
-    }
-    return generateBackdropSvg('CineVerse');
-}
-
-// Resolve the proper image source for a movie object
+// === Image Helpers ===
 function getMoviePoster(movie) {
     if (movie._posterUrl) return movie._posterUrl;
     if (movie.poster_path) return `${CONFIG.IMG_BASE}/w500${movie.poster_path}`;
-    return generatePosterSvg(movie.title, '#ff3cac', '#784ba0');
+    return generatePosterSvg(movie.title || 'Movie', '#ff3cac', '#784ba0');
 }
 
 function getMovieBackdrop(movie) {
     if (movie._backdropUrl) return movie._backdropUrl;
     if (movie.backdrop_path) return `${CONFIG.IMG_BASE}/original${movie.backdrop_path}`;
-    return generateBackdropSvg(movie.title);
+    return generateBackdropSvg(movie.title || 'CineVerse');
 }
 
 
