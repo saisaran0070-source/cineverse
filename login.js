@@ -294,14 +294,18 @@ $$('.social-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         if (btn.classList.contains('phone')) return; // Handled by setupPhoneAuth
         if (btn.classList.contains('google')) {
-            btn.style.opacity = '0.6';
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>Connecting...</span>';
+            btn.style.opacity = '0.8';
             btn.style.pointerEvents = 'none';
+            
             signInWithPopup(auth, provider)
                 .then((result) => {
                     showLoginToast('Welcome! Redirecting...', 'success');
                     window.location.replace('index.html');
                 })
                 .catch((error) => {
+                    btn.innerHTML = originalContent;
                     btn.style.opacity = '1';
                     btn.style.pointerEvents = 'auto';
                     console.error("Google Auth Error:", error);

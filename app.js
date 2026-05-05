@@ -436,7 +436,15 @@ function setHeroIndex(index) {
     if (!movie) return;
 
     const bg = getMovieBackdrop(movie);
-    $('#heroBackdrop').style.backgroundImage = `url(${bg})`;
+    const backdropEl = $('#heroBackdrop');
+    if (backdropEl) {
+        backdropEl.style.opacity = '0';
+        setTimeout(() => {
+            backdropEl.style.backgroundImage = `url(${bg})`;
+            backdropEl.style.opacity = '1';
+        }, 50);
+    }
+    
     $('#heroTitle').textContent = movie.title;
     $('#heroDescription').textContent = movie.overview
         ? movie.overview.substring(0, 200) + (movie.overview.length > 200 ? '...' : '') : '';
