@@ -1772,6 +1772,26 @@ html {
     display: none !important;
 }
 
+/* === Pulse Animation for Watch Together */
+.pulse-btn {
+    position: relative;
+    color: var(--accent-gold) !important;
+    background: rgba(255, 215, 0, 0.1) !important;
+    border: 1px solid rgba(255, 215, 0, 0.2) !important;
+    animation: buttonPulse 2s infinite;
+}
+
+@keyframes buttonPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+}
+
+.pulse-btn:hover {
+    background: var(--accent-gold) !important;
+    color: var(--bg-dark) !important;
+}
+
 /* === Responsive === */
 @media (max-width: 1024px) {
     .hero-title {

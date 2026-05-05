@@ -1339,9 +1339,25 @@ async function handleSearch(query) {
 }
 
 // === Initialization ===
+const APP_VERSION = '4.2.0'; // Force cache clear
+
 async function init() {
-    console.log('🎬 CineVerse initializing...');
+    console.log(`🎬 CineVerse ${APP_VERSION} initializing...`);
     
+    // Version Check (Force reload if version changed)
+    const storedVersion = localStorage.getItem('cineverse_version');
+    if (storedVersion && storedVersion !== APP_VERSION) {
+        localStorage.setItem('cineverse_version', APP_VERSION);
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(regs => {
+                for (let reg of regs) reg.unregister();
+                window.location.reload(true);
+            });
+            return;
+        }
+    }
+    localStorage.setItem('cineverse_version', APP_VERSION);
+
     // Core setups
     setupNavigation();
     setupGlobalListeners();
@@ -1353,31 +1369,36 @@ async function init() {
         initWatchSystem();
     }
     
+    // Watch Together Nav Button
+    $('#openWatchTogetherBtn')?.addEventListener('click', () => {
+        handleNavSection('home'); // Reset view
+        if (window.toggleWatchTogether) window.toggleWatchTogether();
+        else showToast("Live Sync starting...");
+    });
+    
     // Check if the backend is configured with an API key
     try {
-        // Verify API key with a small request to our backend
         const test = await tmdbFetch('/configuration');
-        if (!test) {
-            isUsingFallback = true;
-        }
+        if (!test) isUsingFallback = true;
     } catch (e) {
         isUsingFallback = true;
     }
-    loadMainContent(false); // Pass false to prevent scrolling
-
-    if (isUsingFallback) {
-        console.log('⚠️ Running locally or backend failed. Using offline sample data.');
-    }
+    loadMainContent(false); 
 
     // Dismiss cinematic loading screen after animation completes
     const cinemaLoader = document.getElementById('cinemaLoader');
     if (cinemaLoader) {
-        setTimeout(() => {
+        // Safety timeout: loader MUST disappear after 5s regardless
+        const loaderTimeout = setTimeout(() => {
             cinemaLoader.classList.add('fade-out');
-            setTimeout(() => {
-                cinemaLoader.remove();
-            }, 600);
-        }, 3500); // Give enough time for the pulsing animation to play
+            setTimeout(() => cinemaLoader.remove(), 600);
+        }, 5000);
+
+        setTimeout(() => {
+            clearTimeout(loaderTimeout);
+            cinemaLoader.classList.add('fade-out');
+            setTimeout(() => cinemaLoader.remove(), 600);
+        }, 3500); 
     }
 }
 
