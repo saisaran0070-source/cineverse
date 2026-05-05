@@ -1005,6 +1005,10 @@ function setupUserMenu() {
             if (userProfile) {
                 userProfile.style.display = 'block';
                 loadUserProfile(user);
+                // Watch Together listener
+                if (typeof listenForWatchRequests === 'function') {
+                    listenForWatchRequests();
+                }
             }
         } else {
             // Not logged in — redirect to login page immediately to lock the website
@@ -1143,6 +1147,26 @@ function viewPublicProfile(uid, userData) {
         e.preventDefault();
         modal.classList.remove('active');
         openChatWithUser(uid, userData.displayName);
+    };
+
+    // Add Watch Together Button
+    let watchBtn = $('#profileInviteWatchBtn');
+    if (!watchBtn) {
+        watchBtn = document.createElement('button');
+        watchBtn.id = 'profileInviteWatchBtn';
+        watchBtn.className = 'btn btn-secondary';
+        watchBtn.style.marginTop = '10px';
+        watchBtn.style.width = '100%';
+        watchBtn.innerHTML = '<i class="fas fa-play-circle"></i> Watch Together';
+        $('#profileForm').appendChild(watchBtn);
+    }
+    watchBtn.style.display = 'flex';
+    watchBtn.onclick = (e) => {
+        e.preventDefault();
+        // For now, it invites to watch the "last viewed" movie or a featured one
+        const featured = heroMovies && heroMovies[0] ? heroMovies[0] : {id: 912649, title: "Venom: The Last Dance"};
+        inviteToWatch(uid, featured);
+        modal.classList.remove('active');
     };
 
     // Reset modal on close

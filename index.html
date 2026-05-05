@@ -35,6 +35,7 @@
     <link rel="stylesheet" href="profile.css">
     <link rel="stylesheet" href="social.css">
     <link rel="stylesheet" href="chat.css">
+    <link rel="stylesheet" href="watch.css">
     <link rel="icon" type="image/png" href="icons/icon-192.png">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     
@@ -568,6 +569,14 @@
                     <textarea id="profileSuggestions" class="profile-input profile-textarea" rows="2" placeholder="List your favorite movies..."></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary btn-glow profile-save-btn" id="saveProfileBtn">Save Changes</button>
+                <div id="publicProfileActions" style="display:none; flex-direction:column; gap:10px; margin-top:10px;">
+                    <button type="button" class="btn btn-primary btn-glow" id="messageUserBtn" style="width:100%;">
+                        <i class="fas fa-comment-alt"></i> Send Message
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="inviteWatchBtn" style="width:100%; border-color:var(--accent-primary); color:var(--accent-primary);">
+                        <i class="fas fa-play-circle"></i> Watch Together
+                    </button>
+                </div>
             </form>
         </div>
     </div>

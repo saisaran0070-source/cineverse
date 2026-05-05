@@ -1,0 +1,195 @@
+/* ============================================
+   CINEVERSE WATCH TOGETHER STYLES
+   ============================================ */
+
+/* WATCH REQUEST TOAST */
+.watch-request-toast {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, rgba(20, 20, 40, 0.95), rgba(10, 10, 20, 0.98));
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--accent-primary);
+    padding: 20px;
+    border-radius: 20px;
+    z-index: 11000;
+    box-shadow: 0 15px 40px rgba(255, 60, 172, 0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 300px;
+    transform: translateX(400px);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.watch-request-toast.active {
+    transform: translateX(0);
+}
+
+.watch-request-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.watch-request-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-primary);
+}
+
+.watch-request-info p {
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.watch-request-info span {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.watch-request-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.watch-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.watch-accept-btn {
+    background: var(--gradient-primary);
+    color: #fff;
+}
+
+.watch-decline-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+/* WATCH PARTY OVERLAY */
+.watch-party-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0a0a1a;
+    z-index: 10500;
+    display: none;
+    flex-direction: column;
+}
+
+.watch-party-overlay.active {
+    display: flex;
+}
+
+.watch-party-header {
+    height: 60px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.watch-party-main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.watch-party-player-container {
+    flex: 1;
+    position: relative;
+    background: #000;
+}
+
+.watch-party-sidebar {
+    width: 350px;
+    background: rgba(15, 15, 30, 0.5);
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+}
+
+.sync-status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: rgba(0, 245, 212, 0.1);
+    color: #00f5d4;
+    border: 1px solid rgba(0, 245, 212, 0.3);
+}
+
+.watch-chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.watch-chat-input-area {
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.02);
+    display: flex;
+    gap: 10px;
+}
+
+.watch-chat-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 8px 15px;
+    color: #fff;
+    font-size: 0.85rem;
+}
+
+.sync-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.watch-party-player-container:hover .sync-controls {
+    opacity: 1;
+}
+
+.sync-btn {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sync-btn:hover {
+    background: var(--accent-primary);
+    border-color: transparent;
+}
