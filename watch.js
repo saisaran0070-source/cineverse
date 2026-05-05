@@ -281,6 +281,12 @@ function createWatchPartyOverlay() {
                 <div id="wpPlayerWrapper" style="width:100%; height:100%;">
                     <iframe id="wpPlayerIframe" src="" frameborder="0" allowfullscreen style="width:100%; height:100%;"></iframe>
                 </div>
+                <!-- SYNC SHIELD -->
+                <div id="wpPauseShield" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; flex-direction:column; align-items:center; justify-content:center; z-index:50;">
+                    <i class="fas fa-pause" style="font-size:4rem; color:var(--accent-primary); margin-bottom:15px; filter:drop-shadow(0 0 15px var(--accent-primary));"></i>
+                    <h2 style="color:#fff; letter-spacing:2px;">SESSION PAUSED</h2>
+                    <p style="color:var(--text-muted);">Waiting for host to resume...</p>
+                </div>
                 <div class="sync-controls">
                     <button class="sync-btn" onclick="syncPlayback('pause')">
                         <i class="fas fa-pause"></i> Pause for All
@@ -305,13 +311,11 @@ function createWatchPartyOverlay() {
         if (e.key === 'Enter') sendWatchChatMessage();
     });
 
-    // Fullscreen Logic for Watch Party
+    // Fullscreen Logic
     document.getElementById('wpFullscreenBtn').addEventListener('click', () => {
         const container = document.getElementById('wpPlayerContainer');
         if (!document.fullscreenElement) {
-            container.requestFullscreen().catch(err => {
-                showToast("Fullscreen not supported for this player.");
-            });
+            container.requestFullscreen().catch(err => console.error(err));
         } else {
             document.exitFullscreen();
         }
@@ -320,20 +324,30 @@ function createWatchPartyOverlay() {
 
 function updateWatchPartyUI(data) {
     document.getElementById('wpMovieTitle').textContent = `Watching: ${data.movieTitle}`;
+    
+    // Update Sync Shield
+    const shield = document.getElementById('wpPauseShield');
+    if (shield) {
+        shield.style.display = data.isPlaying ? 'none' : 'flex';
+    }
+
     const statusBadge = document.getElementById('wpSyncStatus');
     if (data.status === 'active') {
         statusBadge.textContent = 'LIVE SYNC ON';
         statusBadge.style.background = 'rgba(0, 245, 212, 0.1)';
         statusBadge.style.color = '#00f5d4';
-    } else {
-        statusBadge.textContent = 'WAITING FOR FRIEND...';
-        statusBadge.style.background = 'rgba(255, 107, 53, 0.1)';
-        statusBadge.style.color = '#ff6b35';
     }
 
     const iframe = document.getElementById('wpPlayerIframe');
     const targetSrc = `https://autoembed.co/movie/tmdb/${data.movieId}`;
-    if (iframe.src !== targetSrc) iframe.src = targetSrc;
+    
+    // If it's a "play" action, we refresh the iframe to ensure sync
+    if (data.lastAction === 'play' && data.actionTime > (window.lastSyncTime || 0)) {
+        window.lastSyncTime = data.actionTime;
+        iframe.src = targetSrc; 
+    } else if (iframe.src !== targetSrc) {
+        iframe.src = targetSrc;
+    }
 }
 
 async function syncPlayback(action) {
