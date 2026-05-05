@@ -826,109 +826,49 @@ function showToast(message) {
 // === Navigation ===
 function setupNavigation() {
     window.addEventListener('scroll', () => {
-        $('#navbar').classList.toggle('scrolled', window.scrollY > 50);
-        $('#scrollTopBtn').classList.toggle('visible', window.scrollY > 400);
-    });
+        $('#navbar')?.classList.toggle('scrolled', window.scrollY > 50);
+        $('#scrollTopBtn')?.classList.toggle('visible', window.scrollY > 400);
+    }, { passive: true });
 
-    $('#scrollTopBtn').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    $('#scrollTopBtn')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-    $('#mobileMenuBtn').addEventListener('click', () => $('#navLinks').classList.toggle('active'));
+    $('#mobileMenuBtn')?.addEventListener('click', () => $('#navLinks')?.classList.toggle('active'));
 
     $$('.nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            $$('.nav-link').forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            $('#navLinks').classList.remove('active');
-            handleNavSection(link.dataset.section);
-        });
-    });
-
-    const searchBtn = $('#searchBtn');
-    const searchContainer = $('#searchContainer');
-    const searchInput = $('#searchInput');
-
-    searchBtn.addEventListener('click', () => {
-        if (searchContainer.classList.contains('active')) {
-            if (searchInput.value.trim()) searchMovies(searchInput.value);
-            else searchContainer.classList.remove('active');
-        } else {
-            searchContainer.classList.add('active');
-            searchInput.focus();
-        }
-    });
-
-    searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && searchInput.value.trim()) searchMovies(searchInput.value);
-    });
-
-    $('#clearSearchBtn').addEventListener('click', () => {
-        $('#searchResultsSection').classList.add('hidden');
-        toggleMainSections(true);
-        $('#searchInput').value = '';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    $('#clearGenreBtn').addEventListener('click', () => $('#genreResultsSection').classList.add('hidden'));
-
-    $('#playerClose').addEventListener('click', closePlayer);
-
-    $('#detailClose').addEventListener('click', () => {
-        $('#detailModal').classList.remove('active');
-        document.body.style.overflow = '';
-    });
-
-    $$('.server-btn[data-server]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            if (currentMovieId) {
-                const serverIdx = parseInt(btn.dataset.server) - 1;
-                $$('.server-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentServer = serverIdx;
-                loadMovieStream(currentMovieId, serverIdx);
-                showToast(`Switched to Server ${serverIdx + 1}`);
+            const section = link.getAttribute('data-section');
+            if (section) {
+                handleNavSection(section);
+                // Update active state
+                $$('.nav-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                $('#navLinks')?.classList.remove('active');
             }
         });
     });
 
-    // External link is now handled directly by the <a> tag in HTML for 100% reliability.
-
-    $('#playerModal').addEventListener('click', (e) => { if (e.target === $('#playerModal')) closePlayer(); });
-
-    $('#detailModal').addEventListener('click', (e) => {
-        if (e.target === $('#detailModal')) {
-            $('#detailModal').classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            if ($('#playerModal').classList.contains('active')) closePlayer();
-            if ($('#detailModal').classList.contains('active')) {
-                $('#detailModal').classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        }
-    });
-
+    // See All Buttons
     $$('.see-all-btn').forEach(btn => {
-        btn.addEventListener('click', () => loadSeeAll(btn.dataset.category));
+        btn.addEventListener('click', () => loadSeeAll(btn.getAttribute('data-category')));
     });
 }
 
 function handleNavSection(section) {
-    switch (section) {
-        case 'home':
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            toggleMainSections(true);
-            $('#searchResultsSection').classList.add('hidden');
-            $('#genreResultsSection').classList.add('hidden');
-            break;
-        case 'trending': $('#trendingSection').scrollIntoView({ behavior: 'smooth' }); break;
-        case 'top-rated': $('#topRatedSection').scrollIntoView({ behavior: 'smooth' }); break;
-        case 'genres': $('#genreSection').scrollIntoView({ behavior: 'smooth' }); break;
-        case 'languages': $('#languageSection').scrollIntoView({ behavior: 'smooth' }); break;
+    if (!section) return;
+    const target = section.toLowerCase();
+    
+    // Hide search results when navigating to a section
+    $('#searchResultsSection')?.classList.add('hidden');
+    $('#genreResultsSection')?.classList.add('hidden');
+    toggleMainSections(true);
+
+    switch (target) {
+        case 'home': window.scrollTo({ top: 0, behavior: 'smooth' }); break;
+        case 'trending': $('#trendingSection')?.scrollIntoView({ behavior: 'smooth' }); break;
+        case 'top-rated': $('#topRatedSection')?.scrollIntoView({ behavior: 'smooth' }); break;
+        case 'genres': $('#genreSection')?.scrollIntoView({ behavior: 'smooth' }); break;
+        case 'languages': $('#languageSection')?.scrollIntoView({ behavior: 'smooth' }); break;
     }
 }
 
@@ -943,24 +883,29 @@ async function loadSeeAll(category) {
 
     const section = $('#searchResultsSection');
     const grid = $('#searchResultsGrid');
+    if (!section || !grid) return;
+
     $('#searchResultsTitle').innerHTML = `<i class="fas fa-film"></i> ${title}`;
     section.classList.remove('hidden');
     toggleMainSections(false);
     grid.innerHTML = '';
 
+    createSkeletons(grid);
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
     let hasData = false;
     for (let page = 1; page <= 3; page++) {
         const data = await tmdbFetch(endpoint, { page });
         if (data?.results) {
+            if (!hasData) grid.innerHTML = '';
             hasData = true;
             data.results.forEach((m, i) => grid.appendChild(createMovieCard(m, i + (page - 1) * 20)));
         }
     }
     if (!hasData) {
+        grid.innerHTML = '';
         getSampleMovies(category).forEach((m, i) => grid.appendChild(createMovieCard(m, i)));
     }
-
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // User Menu and Auth logic moved below init.
@@ -1311,88 +1256,69 @@ function toggleMainSections(show) {
     });
 }
 
-function handleNavSection(section) {
-    section = section.toLowerCase();
-    
-    // Close mobile menu if open
-    const sidebar = $('#sidebar');
-    if (sidebar) sidebar.classList.remove('active');
-    
-    // Hide search results when navigating to a section
-    $('#searchResultsSection').classList.add('hidden');
-    toggleMainSections(true);
-
-    switch (section) {
-        case 'home': window.scrollTo({ top: 0, behavior: 'smooth' }); break;
-        case 'trending': $('#trendingSection').scrollIntoView({ behavior: 'smooth' }); break;
-        case 'toprated': $('#topRatedSection').scrollIntoView({ behavior: 'smooth' }); break;
-        case 'genres': $('#genreSection').scrollIntoView({ behavior: 'smooth' }); break;
-        case 'languages': $('#languageSection').scrollIntoView({ behavior: 'smooth' }); break;
-    }
-}
-
-// === Event Listeners ===
-function setupEventListeners() {
+// === Global Click Listeners ===
+function setupGlobalListeners() {
     // Search
-    const searchInput = $('#searchInput');
     const searchBtn = $('#searchBtn');
-    if (searchBtn && searchInput) {
-        searchBtn.onclick = () => handleSearch(searchInput.value);
-        searchInput.onkeypress = (e) => { if (e.key === 'Enter') handleSearch(searchInput.value); };
-    }
+    const searchContainer = $('#searchContainer');
+    const searchInput = $('#searchInput');
 
-    // Modal Close
-    const closePlayerBtn = $('#closePlayerBtn');
-    if (closePlayerBtn) closePlayerBtn.onclick = closePlayer;
-
-    const closeDetailBtn = $('#closeDetailBtn');
-    if (closeDetailBtn) closeDetailBtn.onclick = closeDetail;
-
-    // Scroll to Top
-    const scrollTopBtn = $('#scrollTopBtn');
-    if (scrollTopBtn) {
-        scrollTopBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // See All Buttons
-    $$('.see-all-btn').forEach(btn => {
-        btn.onclick = () => {
-            const cat = btn.getAttribute('data-category');
-            loadSeeAll(cat);
-        };
-    });
-
-    // Navigation Links
-    $$('.nav-link').forEach(link => {
-        link.onclick = (e) => {
-            const href = link.getAttribute('href');
-            if (href && href.startsWith('#')) {
-                e.preventDefault();
-                const target = href.substring(1);
-                handleNavSection(target);
+    if (searchBtn && searchContainer && searchInput) {
+        searchBtn.onclick = () => {
+            if (searchContainer.classList.contains('active')) {
+                if (searchInput.value.trim()) handleSearch(searchInput.value);
+                else searchContainer.classList.remove('active');
+            } else {
+                searchContainer.classList.add('active');
+                searchInput.focus();
             }
         };
+
+        searchInput.onkeypress = (e) => { 
+            if (e.key === 'Enter' && searchInput.value.trim()) handleSearch(searchInput.value); 
+        };
+    }
+
+    // Modal Controls
+    $('#playerClose')?.addEventListener('click', closePlayer);
+    $('#detailClose')?.addEventListener('click', closeDetail);
+    
+    // Server Switching
+    $$('.server-btn[data-server]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            if (currentMovieId) {
+                const serverIdx = parseInt(btn.dataset.server) - 1;
+                $$('.server-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentServer = serverIdx;
+                loadMovieStream(currentMovieId, serverIdx);
+                showToast(`Switched to Server ${serverIdx + 1}`);
+            }
+        });
     });
 
-    // 3D Parallax Banner & Glassmorphism Navbar Logic
-    const heroBackdrop = $('#heroBackdrop');
+    // Close Modals on click outside
+    window.addEventListener('click', (e) => {
+        if (e.target === $('#playerModal')) closePlayer();
+        if (e.target === $('#detailModal')) closeDetail();
+    });
+
+    // Escape Key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closePlayer();
+            closeDetail();
+        }
+    });
+
+    // Scroll Effects
     const navBar = $('#navbar');
-    
+    const heroBackdrop = $('#heroBackdrop');
     window.addEventListener('scroll', () => {
         const scrollY = window.scrollY;
-        
-        // Parallax effect: move background slower than the foreground
+        navBar?.classList.toggle('scrolled', scrollY > 50);
         if (heroBackdrop && scrollY < window.innerHeight) {
             heroBackdrop.style.transform = `translateY(${scrollY * 0.4}px)`;
-        }
-        
-        // Glassmorphism Navbar toggle
-        if (navBar) {
-            if (scrollY > 50) {
-                navBar.classList.add('scrolled');
-            } else {
-                navBar.classList.remove('scrolled');
-            }
         }
     }, { passive: true });
 }
@@ -1427,7 +1353,7 @@ async function init() {
     
     // Core setups
     setupNavigation();
-    setupEventListeners();
+    setupGlobalListeners();
     setupUserMenu();
     setupFeedbackUI();
     
