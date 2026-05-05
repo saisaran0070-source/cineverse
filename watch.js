@@ -125,7 +125,7 @@ async function inviteToWatch(friendId, movie, friendName) {
     if (!user) return;
 
     try {
-        await db.collection('watch_sessions').add({
+        const sessionRef = await db.collection('watch_sessions').add({
             hostId: user.uid,
             hostName: user.displayName || 'Friend',
             guestId: friendId,
@@ -138,6 +138,8 @@ async function inviteToWatch(friendId, movie, friendName) {
         });
         
         showToast(`Invitation sent to ${friendName || 'friend'}!`);
+        // JOIN ROOM IMMEDIATELY (Waiting state)
+        startWatchParty(sessionRef.id);
     } catch (e) {
         console.error("Watch Invite Error:", e);
         showToast("Failed to send invitation.");
@@ -148,6 +150,7 @@ function listenForWatchRequests() {
     const user = auth.currentUser;
     if (!user) return;
 
+    // Listen for invitations SENT TO ME
     db.collection('watch_sessions')
         .where('guestId', '==', user.uid)
         .where('status', '==', 'pending')
@@ -156,6 +159,21 @@ function listenForWatchRequests() {
                 if (change.type === 'added') {
                     const data = change.doc.data();
                     showWatchRequestToast(change.doc.id, data);
+                }
+            });
+        });
+
+    // Listen for invitations I SENT (to auto-start when they accept)
+    db.collection('watch_sessions')
+        .where('hostId', '==', user.uid)
+        .where('status', '==', 'active')
+        .onSnapshot(snapshot => {
+            snapshot.docChanges().forEach(change => {
+                if (change.type === 'modified') {
+                    const sessionId = change.doc.id;
+                    if (!document.getElementById('watchPartyOverlay')?.classList.contains('active')) {
+                        startWatchParty(sessionId);
+                    }
                 }
             });
         });
@@ -238,14 +256,19 @@ function createWatchPartyOverlay() {
         <div class="watch-party-header">
             <div style="display:flex; align-items:center; gap:15px;">
                 <h3 id="wpMovieTitle" style="color:#fff; font-size:1.1rem; margin:0;">Watching Movie</h3>
-                <span class="sync-status-badge">LIVE SYNC ON</span>
+                <span class="sync-status-badge" id="wpSyncStatus">WAITING FOR FRIEND...</span>
             </div>
-            <button class="nav-action-btn" onclick="endWatchParty()" title="Exit Room">
-                <i class="fas fa-times"></i>
-            </button>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <button class="nav-action-btn" id="wpFullscreenBtn" title="Fullscreen">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button class="nav-action-btn" onclick="endWatchParty()" title="Exit Room">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         </div>
         <div class="watch-party-main">
-            <div class="watch-party-player-container">
+            <div class="watch-party-player-container" id="wpPlayerContainer">
                 <div id="wpPlayerWrapper" style="width:100%; height:100%;">
                     <iframe id="wpPlayerIframe" src="" frameborder="0" allowfullscreen style="width:100%; height:100%;"></iframe>
                 </div>
@@ -272,10 +295,33 @@ function createWatchPartyOverlay() {
     document.getElementById('wpChatInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendWatchChatMessage();
     });
+
+    // Fullscreen Logic for Watch Party
+    document.getElementById('wpFullscreenBtn').addEventListener('click', () => {
+        const container = document.getElementById('wpPlayerContainer');
+        if (!document.fullscreenElement) {
+            container.requestFullscreen().catch(err => {
+                showToast("Fullscreen not supported for this player.");
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    });
 }
 
 function updateWatchPartyUI(data) {
     document.getElementById('wpMovieTitle').textContent = `Watching: ${data.movieTitle}`;
+    const statusBadge = document.getElementById('wpSyncStatus');
+    if (data.status === 'active') {
+        statusBadge.textContent = 'LIVE SYNC ON';
+        statusBadge.style.background = 'rgba(0, 245, 212, 0.1)';
+        statusBadge.style.color = '#00f5d4';
+    } else {
+        statusBadge.textContent = 'WAITING FOR FRIEND...';
+        statusBadge.style.background = 'rgba(255, 107, 53, 0.1)';
+        statusBadge.style.color = '#ff6b35';
+    }
+
     const iframe = document.getElementById('wpPlayerIframe');
     const targetSrc = `https://autoembed.co/movie/tmdb/${data.movieId}`;
     if (iframe.src !== targetSrc) iframe.src = targetSrc;

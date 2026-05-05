@@ -106,21 +106,27 @@
 .watch-party-main {
     flex: 1;
     display: flex;
+    flex-direction: row;
     overflow: hidden;
 }
 
-.watch-party-player-container {
-    flex: 1;
-    position: relative;
-    background: #000;
-}
-
-.watch-party-sidebar {
-    width: 350px;
-    background: rgba(15, 15, 30, 0.5);
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    flex-direction: column;
+@media (max-width: 768px) {
+    .watch-party-main {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+    .watch-party-sidebar {
+        width: 100%;
+        height: 300px;
+        min-height: 300px;
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .watch-party-player-container {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        flex: none;
+    }
 }
 
 .sync-status-badge {
