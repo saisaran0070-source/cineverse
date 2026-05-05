@@ -590,6 +590,9 @@ async function showMovieDetail(movie) {
     $('#detailVotes').textContent = movie.vote_count?.toLocaleString() || '--';
     $('#detailOrigTitle').textContent = movie.original_title || movie.title;
 
+    // Track for Watch Together
+    if (window.setCurrentWatchMovie) window.setCurrentWatchMovie(movie);
+
     const details = await tmdbFetch(`/movie/${movie.id}`);
     const genresContainer = $('#detailGenres');
     genresContainer.innerHTML = '';
@@ -1149,36 +1152,6 @@ function viewPublicProfile(uid, userData) {
         openChatWithUser(uid, userData.displayName);
     };
 
-    // Correctly connect the Watch Together Button
-    let watchBtn = $('#inviteWatchBtn'); // Use the one from HTML if possible
-    if (!watchBtn) {
-        watchBtn = document.createElement('button');
-        watchBtn.id = 'inviteWatchBtn';
-        watchBtn.className = 'btn btn-secondary';
-        watchBtn.style.marginTop = '10px';
-        watchBtn.style.width = '100%';
-        watchBtn.innerHTML = '<i class="fas fa-play-circle"></i> Watch Together';
-        $('#profileForm').appendChild(watchBtn);
-    }
-    
-    // Show the container if it exists
-    const actionsContainer = $('#publicProfileActions');
-    if (actionsContainer) actionsContainer.style.display = 'flex';
-    
-    watchBtn.style.display = 'flex';
-    watchBtn.onclick = (e) => {
-        e.preventDefault();
-        console.log("Inviting to watch:", uid);
-        const featured = (typeof heroMovies !== 'undefined' && heroMovies.length > 0) ? heroMovies[0] : {id: 912649, title: "Venom: The Last Dance"};
-        if (typeof inviteToWatch === 'function') {
-            inviteToWatch(uid, featured);
-            modal.classList.remove('active');
-        } else {
-            console.error("inviteToWatch function not found!");
-            showToast("Watch system initializing... please try again.");
-        }
-    };
-
     // Reset modal on close
     const originalClose = $('#closeProfileBtn').onclick;
     $('#closeProfileBtn').onclick = () => {
@@ -1457,6 +1430,11 @@ async function init() {
     setupEventListeners();
     setupUserMenu();
     setupFeedbackUI();
+    
+    // Initialize Watch System
+    if (typeof initWatchSystem === 'function') {
+        initWatchSystem();
+    }
     
     // Check if the backend is configured with an API key
     try {

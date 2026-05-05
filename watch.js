@@ -4,14 +4,128 @@
 
 let currentWatchSession = null;
 let watchSessionListener = null;
+let currentPendingMovie = null;
+
+// === Initialization ===
+function initWatchSystem() {
+    console.log("📺 Watch System Initializing...");
+    setupWatchEventListeners();
+    listenForWatchRequests();
+}
+
+function setupWatchEventListeners() {
+    // Detail Modal Watch Together Button
+    const wtBtn = document.getElementById('detailWatchTogetherBtn');
+    if (wtBtn) {
+        wtBtn.addEventListener('click', () => {
+            const movieTitle = document.getElementById('detailTitle').textContent;
+            // Get the current movie ID from the app state if possible, or from the detail modal context
+            // We'll store it when showMovieDetail is called
+            openFriendSelector(currentPendingMovie || { title: movieTitle });
+        });
+    }
+
+    // Friend Selector Close
+    const closeFsBtn = document.getElementById('closeFriendSelectorBtn');
+    if (closeFsBtn) {
+        closeFsBtn.addEventListener('click', () => {
+            document.getElementById('friendSelectorModal').classList.remove('active');
+        });
+    }
+
+    // Friend Search Input
+    const fsInput = document.getElementById('friendSearchInput');
+    if (fsInput) {
+        let debounceTimer;
+        fsInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            const query = fsInput.value.trim();
+            if (query.length < 2) return;
+            debounceTimer = setTimeout(() => searchFriendsForWatch(query), 400);
+        });
+    }
+}
+
+// === Friend Selection ===
+function openFriendSelector(movie) {
+    currentPendingMovie = movie;
+    const modal = document.getElementById('friendSelectorModal');
+    const targetText = document.getElementById('watchTargetMovieName');
+    
+    if (targetText) targetText.textContent = `To watch "${movie.title}" with you`;
+    if (modal) modal.classList.add('active');
+    
+    const results = document.getElementById('friendSearchResults');
+    if (results) results.innerHTML = '<div style="padding: 20px; color: rgba(255,255,255,0.3); font-size: 0.8rem;">Type a name to find friends...</div>';
+    
+    const input = document.getElementById('friendSearchInput');
+    if (input) {
+        input.value = '';
+        input.focus();
+    }
+}
+
+async function searchFriendsForWatch(query) {
+    const resultsContainer = document.getElementById('friendSearchResults');
+    if (!resultsContainer) return;
+
+    resultsContainer.innerHTML = '<div style="padding: 20px; color: var(--accent-primary); font-size: 0.8rem;"><i class="fas fa-circle-notch fa-spin"></i> Searching...</div>';
+
+    try {
+        const snapshot = await db.collection('users')
+            .where('displayName', '>=', query)
+            .where('displayName', '<=', query + '\uf8ff')
+            .limit(5)
+            .get();
+
+        if (snapshot.empty) {
+            resultsContainer.innerHTML = '<div style="padding: 20px; color: var(--text-muted); font-size: 0.8rem;">No members found</div>';
+            return;
+        }
+
+        resultsContainer.innerHTML = '';
+        snapshot.forEach(doc => {
+            const user = doc.data();
+            const uid = doc.id;
+            if (uid === auth.currentUser?.uid) return;
+
+            const el = document.createElement('div');
+            el.className = 'user-result-item';
+            el.style.cssText = 'display:flex; align-items:center; gap:12px; padding:10px; background:rgba(255,255,255,0.03); border-radius:10px; cursor:pointer; transition:all 0.2s;';
+            el.onmouseover = () => el.style.background = 'rgba(255,255,255,0.08)';
+            el.onmouseout = () => el.style.background = 'rgba(255,255,255,0.03)';
+
+            const avatar = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random`;
+            
+            el.innerHTML = `
+                <img src="${avatar}" style="width:35px; height:35px; border-radius:50%; border:1px solid var(--accent-primary);">
+                <div style="flex:1; text-align:left;">
+                    <div style="color:#fff; font-size:0.85rem; font-weight:600;">${user.displayName || 'User'}</div>
+                    <div style="color:var(--text-muted); font-size:0.7rem;">Click to invite</div>
+                </div>
+                <i class="fas fa-paper-plane" style="color:var(--accent-primary); font-size:0.8rem;"></i>
+            `;
+            
+            el.addEventListener('click', () => {
+                inviteToWatch(uid, currentPendingMovie, user.displayName);
+                document.getElementById('friendSelectorModal').classList.remove('active');
+                if (document.getElementById('detailModal')) document.getElementById('detailModal').classList.remove('active');
+            });
+            
+            resultsContainer.appendChild(el);
+        });
+    } catch (e) {
+        console.error("Friend Search Error:", e);
+    }
+}
 
 // === Session Management ===
-async function inviteToWatch(friendId, movie) {
+async function inviteToWatch(friendId, movie, friendName) {
     const user = auth.currentUser;
     if (!user) return;
 
     try {
-        const sessionRef = await db.collection('watch_sessions').add({
+        await db.collection('watch_sessions').add({
             hostId: user.uid,
             hostName: user.displayName || 'Friend',
             guestId: friendId,
@@ -23,10 +137,10 @@ async function inviteToWatch(friendId, movie) {
             timestamp: serverTimestamp()
         });
         
-        showToast(`Invitation sent to watch "${movie.title}"!`);
-        return sessionRef.id;
+        showToast(`Invitation sent to ${friendName || 'friend'}!`);
     } catch (e) {
         console.error("Watch Invite Error:", e);
+        showToast("Failed to send invitation.");
     }
 }
 
@@ -74,7 +188,7 @@ function showWatchRequestToast(sessionId, data) {
 
 async function acceptWatchInvite(sessionId) {
     const toast = document.getElementById('watchRequestToast');
-    toast.classList.remove('active');
+    if (toast) toast.classList.remove('active');
 
     try {
         await db.collection('watch_sessions').doc(sessionId).update({
@@ -88,11 +202,11 @@ async function acceptWatchInvite(sessionId) {
 
 async function declineWatchInvite(sessionId) {
     const toast = document.getElementById('watchRequestToast');
-    toast.classList.remove('active');
+    if (toast) toast.classList.remove('active');
     await db.collection('watch_sessions').doc(sessionId).delete();
 }
 
-// === Watch Party UI ===
+// === Watch Party Room ===
 function startWatchParty(sessionId) {
     const overlay = document.getElementById('watchPartyOverlay');
     if (!overlay) {
@@ -101,7 +215,6 @@ function startWatchParty(sessionId) {
     
     document.getElementById('watchPartyOverlay').classList.add('active');
     
-    // Listen for session updates
     if (watchSessionListener) watchSessionListener();
     
     watchSessionListener = db.collection('watch_sessions').doc(sessionId)
@@ -124,7 +237,7 @@ function createWatchPartyOverlay() {
     overlay.innerHTML = `
         <div class="watch-party-header">
             <div style="display:flex; align-items:center; gap:15px;">
-                <h3 id="wpMovieTitle" style="color:#fff; font-size:1.1rem;">Watching Movie</h3>
+                <h3 id="wpMovieTitle" style="color:#fff; font-size:1.1rem; margin:0;">Watching Movie</h3>
                 <span class="sync-status-badge">LIVE SYNC ON</span>
             </div>
             <button class="nav-action-btn" onclick="endWatchParty()" title="Exit Room">
@@ -148,7 +261,7 @@ function createWatchPartyOverlay() {
             <div class="watch-party-sidebar">
                 <div class="watch-chat-messages" id="wpChatMessages"></div>
                 <div class="watch-chat-input-area">
-                    <input type="text" class="watch-chat-input" id="wpChatInput" placeholder="Chat with friend...">
+                    <input type="text" class="watch-chat-input" id="wpChatInput" placeholder="Type a message...">
                 </div>
             </div>
         </div>
@@ -156,7 +269,6 @@ function createWatchPartyOverlay() {
     
     document.body.appendChild(overlay);
     
-    // Setup Chat Input
     document.getElementById('wpChatInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendWatchChatMessage();
     });
@@ -164,18 +276,13 @@ function createWatchPartyOverlay() {
 
 function updateWatchPartyUI(data) {
     document.getElementById('wpMovieTitle').textContent = `Watching: ${data.movieTitle}`;
-    
     const iframe = document.getElementById('wpPlayerIframe');
     const targetSrc = `https://autoembed.co/movie/tmdb/${data.movieId}`;
-    
-    if (iframe.src !== targetSrc) {
-        iframe.src = targetSrc;
-    }
+    if (iframe.src !== targetSrc) iframe.src = targetSrc;
 }
 
 async function syncPlayback(action) {
     if (!currentWatchSession) return;
-    
     try {
         await db.collection('watch_sessions').doc(currentWatchSession.id).update({
             isPlaying: action === 'play',
@@ -192,11 +299,7 @@ function endWatchParty() {
     if (watchSessionListener) watchSessionListener();
     const overlay = document.getElementById('watchPartyOverlay');
     if (overlay) overlay.classList.remove('active');
-    
-    if (currentWatchSession) {
-        db.collection('watch_sessions').doc(currentWatchSession.id).delete();
-    }
-    
+    if (currentWatchSession) db.collection('watch_sessions').doc(currentWatchSession.id).delete();
     currentWatchSession = null;
 }
 
@@ -207,29 +310,30 @@ async function sendWatchChatMessage() {
     
     const user = auth.currentUser;
     const msg = {
-        senderName: user.displayName || 'Me',
+        senderName: user.displayName || 'User',
         text: text,
         timestamp: Date.now()
     };
     
     try {
-        // We append chat to the session doc for simplicity in this version
         const chatMsgs = document.getElementById('wpChatMessages');
         const msgDiv = document.createElement('div');
         msgDiv.style.padding = '8px 12px';
         msgDiv.style.background = 'rgba(255,255,255,0.05)';
         msgDiv.style.borderRadius = '10px';
         msgDiv.style.color = '#fff';
-        msgDiv.style.fontSize = '0.85rem';
+        msgDiv.style.fontSize = '0.8rem';
         msgDiv.innerHTML = `<strong>${msg.senderName}:</strong> ${msg.text}`;
         chatMsgs.appendChild(msgDiv);
         chatMsgs.scrollTop = chatMsgs.scrollHeight;
-        
         input.value = '';
-        
-        // Actually sync the chat message via Firestore
         await db.collection('watch_sessions').doc(currentWatchSession.id).collection('messages').add(msg);
     } catch (e) {
-        console.error("Chat Sync Error:", e);
+        console.error("Chat Error:", e);
     }
 }
+
+// Global hook for app.js
+window.setCurrentWatchMovie = (movie) => {
+    currentPendingMovie = movie;
+};
