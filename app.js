@@ -1369,11 +1369,18 @@ async function init() {
         initWatchSystem();
     }
     
-    // Watch Together Nav Button
-    $('#openWatchTogetherBtn')?.addEventListener('click', () => {
+    // Watch Together Nav Buttons
+    const triggerWatch = () => {
         handleNavSection('home'); // Reset view
         if (window.toggleWatchTogether) window.toggleWatchTogether();
         else showToast("Live Sync starting...");
+        $('#navLinks')?.classList.remove('active'); // Close mobile menu
+    };
+
+    $('#openWatchTogetherBtn')?.addEventListener('click', triggerWatch);
+    $('#mobileWatchTogetherBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerWatch();
     });
     
     // Check if the backend is configured with an API key
