@@ -73,7 +73,8 @@
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--accent-primary);
-    box-shadow: 0 0 20px rgba(255, 60, 172, 0.3);
+    box-shadow: 0 0 30px rgba(255, 60, 172, 0.4);
+    background: var(--bg-card);
 }
 
 .avatar-upload-btn {

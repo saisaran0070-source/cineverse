@@ -2016,34 +2016,45 @@ html {
 }
 
 .dropdown-avatar {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background: var(--gradient-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: white;
     flex-shrink: 0;
     background-size: cover;
     background-position: center;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .user-avatar {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: var(--gradient-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: white;
     background-size: cover;
     background-position: center;
+    border: 1.5px solid rgba(255, 60, 172, 0.3);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-glow-small);
+}
+
+.user-avatar:hover {
+    transform: scale(1.05);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 15px var(--accent-primary);
 }
 
 .dropdown-name {
