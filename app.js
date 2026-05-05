@@ -1437,3 +1437,30 @@ function loadRecentlyWatched() {
     });
 }
 
+// === App Download Banner ===
+(function() {
+    const banner = document.getElementById('appDownloadBanner');
+    if (!banner) return;
+
+    // Hide banner if user is already inside the installed PWA
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
+        || window.navigator.standalone === true;
+    
+    // Hide if user previously dismissed the banner
+    const dismissed = localStorage.getItem('appBannerDismissed');
+
+    if (isStandalone || dismissed) {
+        banner.style.display = 'none';
+        return;
+    }
+
+    // Close button
+    const closeBtn = document.getElementById('closeAppBanner');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            banner.classList.add('hidden');
+            localStorage.setItem('appBannerDismissed', 'true');
+            setTimeout(() => banner.style.display = 'none', 300);
+        });
+    }
+})();

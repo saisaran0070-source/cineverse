@@ -2482,3 +2482,133 @@ html {
     flex: 1;
 }
 
+/* ============================================
+   APP DOWNLOAD BANNER
+   ============================================ */
+.app-download-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    background: linear-gradient(135deg, rgba(10, 10, 26, 0.97), rgba(20, 15, 40, 0.97));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 60, 172, 0.25);
+    padding: 12px 20px;
+    animation: slideUpBanner 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.app-download-banner.hidden {
+    animation: slideDownBanner 0.3s ease forwards;
+    pointer-events: none;
+}
+
+@keyframes slideUpBanner {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideDownBanner {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(100%); opacity: 0; }
+}
+
+.app-download-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.app-download-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.app-download-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.app-download-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.app-download-text strong {
+    color: #fff;
+    font-size: 0.95rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.app-download-text span {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.app-download-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, #ff3cac, #784ba0, #2b86c5);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 60, 172, 0.3);
+    letter-spacing: 0.5px;
+}
+
+.app-download-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 25px rgba(255, 60, 172, 0.5);
+}
+
+.app-download-close {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.7rem;
+}
+
+.app-download-close:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+/* Hide on very small screens when keyboard is up */
+@media (max-height: 400px) {
+    .app-download-banner {
+        display: none;
+    }
+}
