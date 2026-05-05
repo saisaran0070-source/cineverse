@@ -1651,7 +1651,7 @@ function setupProfileUI() {
         if (e.target === modal) closeModal();
     });
 
-    // Handle Avatar Upload
+    // Handle Avatar Upload (Free Base64 Method)
     avatarInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -1659,45 +1659,43 @@ function setupProfileUI() {
         const user = auth.currentUser;
         if (!user) return;
 
-        // Simple validation
-        if (file.size > 2 * 1024 * 1024) {
-            showToast("Image too large (Max 2MB)");
+        // Validation for Base64 (Keep it small, e.g., 500KB)
+        if (file.size > 500 * 1024) {
+            showToast("Image too large for free tier (Max 500KB)");
             return;
         }
 
-        const storageRef = storage.ref(`avatars/${user.uid}`);
-        const uploadTask = storageRef.put(file);
-
+        const reader = new FileReader();
         uploadProgress.style.display = 'block';
+        progressBar.style.width = '50%'; // Visual feedback
 
-        uploadTask.on('state_changed', 
-            (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                progressBar.style.width = progress + '%';
-            }, 
-            (error) => {
-                console.error("Upload error:", error);
-                showToast("Upload failed");
-                uploadProgress.style.display = 'none';
-            }, 
-            async () => {
-                const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
-                avatarImg.src = downloadURL;
-                uploadProgress.style.display = 'none';
-                progressBar.style.width = '0%';
-                
-                // Update Firestore and Auth immediately
+        reader.onload = async (event) => {
+            const base64String = event.target.result;
+            
+            try {
+                // Update Firestore immediately
                 await db.collection('users').doc(user.uid).set({
-                    photoURL: downloadURL
+                    photoURL: base64String
                 }, { merge: true });
                 
-                await user.updateProfile({ photoURL: downloadURL });
+                avatarImg.src = base64String;
+                updateUIAvatars(base64String);
                 
-                // Update UI avatars
-                updateUIAvatars(downloadURL);
+                progressBar.style.width = '100%';
+                setTimeout(() => {
+                    uploadProgress.style.display = 'none';
+                    progressBar.style.width = '0%';
+                }, 500);
+                
                 showToast("Avatar updated!");
+            } catch (error) {
+                console.error("Upload error:", error);
+                showToast("Failed to save avatar");
+                uploadProgress.style.display = 'none';
             }
-        );
+        };
+
+        reader.readAsDataURL(file);
     });
 
     // Handle Form Submit
