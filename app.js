@@ -1006,6 +1006,7 @@ function setupUserMenu() {
 
     setupProfileUI();
     setupUserSearch();
+    setupUpdateManager();
 }
 
 // === User Discovery (Search) ===
@@ -1717,11 +1718,13 @@ function setupProfileUI() {
         };
 
         try {
+            // Optimistic UI update for speed
+            $('#dropdownName').textContent = data.displayName;
+            updateUIAvatars(avatarImg.src);
+            
             await db.collection('users').doc(user.uid).set(data, { merge: true });
             await user.updateProfile({ displayName: data.displayName });
             
-            // Update UI
-            $('#dropdownName').textContent = data.displayName;
             showToast("Profile saved successfully!");
             closeModal();
         } catch (error) {
@@ -1732,6 +1735,37 @@ function setupProfileUI() {
             saveBtn.textContent = originalText;
         }
     });
+}
+
+// === Update Manager (Solves "Old Website" issue) ===
+function setupUpdateManager() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('state_changed', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // New version available!
+                        showUpdateToast();
+                    }
+                });
+            });
+        });
+    }
+}
+
+function showUpdateToast() {
+    const toast = document.createElement('div');
+    toast.className = 'update-toast';
+    toast.innerHTML = `
+        <div class="update-toast-content">
+            <i class="fas fa-sync-alt"></i>
+            <span>New version available!</span>
+            <button onclick="window.location.reload()">Refresh Now</button>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('active'), 100);
 }
 
 function loadUserProfile(user) {

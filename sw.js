@@ -1,12 +1,16 @@
-const CACHE_NAME = 'cineverse-v4';
+const CACHE_NAME = 'cineverse-v5';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
     '/login.html',
     '/styles.css',
     '/login.css',
+    '/profile.css',
+    '/social.css',
+    '/chat.css',
     '/app.js',
     '/login.js',
+    '/chat.js',
     '/firebase.js',
     '/manifest.json'
 ];
