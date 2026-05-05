@@ -1149,24 +1149,34 @@ function viewPublicProfile(uid, userData) {
         openChatWithUser(uid, userData.displayName);
     };
 
-    // Add Watch Together Button
-    let watchBtn = $('#profileInviteWatchBtn');
+    // Correctly connect the Watch Together Button
+    let watchBtn = $('#inviteWatchBtn'); // Use the one from HTML if possible
     if (!watchBtn) {
         watchBtn = document.createElement('button');
-        watchBtn.id = 'profileInviteWatchBtn';
+        watchBtn.id = 'inviteWatchBtn';
         watchBtn.className = 'btn btn-secondary';
         watchBtn.style.marginTop = '10px';
         watchBtn.style.width = '100%';
         watchBtn.innerHTML = '<i class="fas fa-play-circle"></i> Watch Together';
         $('#profileForm').appendChild(watchBtn);
     }
+    
+    // Show the container if it exists
+    const actionsContainer = $('#publicProfileActions');
+    if (actionsContainer) actionsContainer.style.display = 'flex';
+    
     watchBtn.style.display = 'flex';
     watchBtn.onclick = (e) => {
         e.preventDefault();
-        // For now, it invites to watch the "last viewed" movie or a featured one
-        const featured = heroMovies && heroMovies[0] ? heroMovies[0] : {id: 912649, title: "Venom: The Last Dance"};
-        inviteToWatch(uid, featured);
-        modal.classList.remove('active');
+        console.log("Inviting to watch:", uid);
+        const featured = (typeof heroMovies !== 'undefined' && heroMovies.length > 0) ? heroMovies[0] : {id: 912649, title: "Venom: The Last Dance"};
+        if (typeof inviteToWatch === 'function') {
+            inviteToWatch(uid, featured);
+            modal.classList.remove('active');
+        } else {
+            console.error("inviteToWatch function not found!");
+            showToast("Watch system initializing... please try again.");
+        }
     };
 
     // Reset modal on close
