@@ -1807,9 +1807,7 @@ function updateUIAvatars(url) {
             el.src = url;
         } else {
             el.textContent = '';
-            el.style.backgroundImage = `url('${url}')`;
-            el.style.backgroundSize = 'cover';
-            el.style.backgroundPosition = 'center';
+            el.style.background = `url('${url}') center/cover no-repeat`;
         }
     });
 }

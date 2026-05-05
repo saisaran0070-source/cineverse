@@ -2027,6 +2027,23 @@ html {
     font-weight: 700;
     color: white;
     flex-shrink: 0;
+    background-size: cover;
+    background-position: center;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: white;
+    background-size: cover;
+    background-position: center;
 }
 
 .dropdown-name {
