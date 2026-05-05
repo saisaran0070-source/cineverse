@@ -16,6 +16,7 @@ firebase.initializeApp(firebaseConfig);
 // Create global references for the app to use
 window.auth = firebase.auth();
 window.db = firebase.firestore();
+window.storage = firebase.storage();
 window.provider = new firebase.auth.GoogleAuthProvider();
 
 // Standard Firebase logic aliases

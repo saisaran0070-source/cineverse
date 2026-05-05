@@ -996,18 +996,163 @@ function setupUserMenu() {
             if (loginBtn) loginBtn.style.display = 'none';
             if (userProfile) {
                 userProfile.style.display = 'block';
-                const nameStr = user.displayName || user.email?.split('@')[0] || 'User';
-                const init = nameStr.charAt(0).toUpperCase();
-                $('#userAvatar').textContent = init;
-                $('#dropdownAvatar').textContent = init;
-                $('#dropdownName').textContent = nameStr;
-                $('#dropdownEmail').textContent = user.email || '';
+                loadUserProfile(user);
             }
         } else {
             // Not logged in — redirect to login page immediately to lock the website
             window.location.replace('login.html');
         }
     });
+
+    setupProfileUI();
+    setupUserSearch();
+}
+
+// === User Discovery (Search) ===
+function setupUserSearch() {
+    const openBtn = $('#openUserSearchBtn');
+    const dropdown = $('#userSearchDropdown');
+    const input = $('#userSearchInput');
+    const resultsContainer = $('#userSearchResults');
+
+    if (!openBtn || !dropdown) return;
+
+    // Toggle Dropdown
+    openBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('active');
+        if (dropdown.classList.contains('active')) input.focus();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target) && e.target !== openBtn) {
+            dropdown.classList.remove('active');
+        }
+    });
+
+    // Search Input with Debounce
+    let debounceTimer;
+    input.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        const query = input.value.trim();
+        
+        if (query.length < 2) {
+            resultsContainer.innerHTML = '<div class="user-search-empty">Type at least 2 characters...</div>';
+            return;
+        }
+
+        debounceTimer = setTimeout(() => searchUsers(query), 400);
+    });
+}
+
+async function searchUsers(query) {
+    const resultsContainer = $('#userSearchResults');
+    resultsContainer.innerHTML = '<div class="user-search-empty">Searching...</div>';
+
+    try {
+        // Simple case-insensitive prefix search (limited by Firestore capabilities)
+        const snapshot = await db.collection('users')
+            .where('displayName', '>=', query)
+            .where('displayName', '<=', query + '\uf8ff')
+            .limit(10)
+            .get();
+
+        if (snapshot.empty) {
+            resultsContainer.innerHTML = '<div class="user-search-empty">No users found</div>';
+            return;
+        }
+
+        resultsContainer.innerHTML = '';
+        snapshot.forEach(doc => {
+            const user = doc.data();
+            const uid = doc.id;
+            
+            // Don't show current user in search
+            if (uid === auth.currentUser?.uid) return;
+
+            const el = document.createElement('div');
+            el.className = 'user-result-item';
+            const avatar = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random`;
+            
+            el.innerHTML = `
+                <img src="${avatar}" class="user-result-avatar">
+                <div class="user-result-info">
+                    <span class="user-result-name">${user.displayName || 'User'}</span>
+                    <span class="user-result-bio">${user.bio || 'No bio yet'}</span>
+                </div>
+            `;
+            
+            el.addEventListener('click', () => {
+                viewPublicProfile(uid, user);
+                $('#userSearchDropdown').classList.remove('active');
+            });
+            
+            resultsContainer.appendChild(el);
+        });
+    } catch (error) {
+        console.error("Search error:", error);
+        resultsContainer.innerHTML = '<div class="user-search-empty">Search failed</div>';
+    }
+}
+
+function viewPublicProfile(uid, userData) {
+    const modal = $('#profileModal');
+    if (!modal) return;
+
+    // Set modal to read-only/public mode
+    modal.classList.add('active', 'public-profile-modal');
+    $('#profileModal h3').textContent = "User Profile";
+    
+    // Fill data
+    $('#profileAvatarImg').src = userData.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || 'User')}&background=random`;
+    $('#profileUsername').value = userData.displayName || '';
+    $('#profileBio').value = userData.bio || '';
+    $('#profileSuggestions').value = userData.suggestedMovies || '';
+    
+    // Disable inputs
+    const inputs = modal.querySelectorAll('.profile-input');
+    inputs.forEach(i => i.readOnly = true);
+    
+    // Hide save button, maybe add "Send Message" button later
+    $('#saveProfileBtn').style.display = 'none';
+    $('#uploadProgress').style.display = 'none';
+    $('.avatar-upload-btn').style.display = 'none';
+
+    // Add Message Button if it doesn't exist
+    let msgBtn = $('#profileMessageBtn');
+    if (!msgBtn) {
+        msgBtn = document.createElement('button');
+        msgBtn.id = 'profileMessageBtn';
+        msgBtn.className = 'btn btn-primary btn-glow message-user-btn';
+        msgBtn.innerHTML = '<i class="fas fa-comment"></i> Send Message';
+        $('#profileForm').appendChild(msgBtn);
+    }
+    msgBtn.style.display = 'flex';
+    
+    // Message button logic (Phase 3)
+    msgBtn.onclick = (e) => {
+        e.preventDefault();
+        modal.classList.remove('active');
+        openChatWithUser(uid, userData.displayName);
+    };
+
+    // Reset modal on close
+    const originalClose = $('#closeProfileBtn').onclick;
+    $('#closeProfileBtn').onclick = () => {
+        modal.classList.remove('active', 'public-profile-modal');
+        $('#profileModal h3').textContent = "Edit Profile";
+        inputs.forEach(i => i.readOnly = false);
+        $('#saveProfileBtn').style.display = 'block';
+        $('.avatar-upload-btn').style.display = 'flex';
+        msgBtn.style.display = 'none';
+        modal.classList.remove('active');
+    };
+}
+
+function openChatWithUser(uid, name) {
+    // Placeholder for Phase 3
+    showToast(`Opening chat with ${name}...`);
+    if (window.initChatWith) window.initChatWith(uid, name);
 }
 
 // === Website Feedback System ===
@@ -1464,3 +1609,175 @@ function loadRecentlyWatched() {
         });
     }
 })();
+
+// === User Profile System ===
+function setupProfileUI() {
+    const openBtn = $('#openProfileBtn');
+    const modal = $('#profileModal');
+    const closeBtn = $('#closeProfileBtn');
+    const form = $('#profileForm');
+    const avatarInput = $('#avatarInput');
+    const avatarImg = $('#profileAvatarImg');
+    const progressBar = $('#progressBar');
+    const uploadProgress = $('#uploadProgress');
+
+    if (!openBtn || !modal) return;
+
+    // Open Modal
+    openBtn.addEventListener('click', () => {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        modal.classList.add('active');
+        
+        // Pre-fill form from Firestore
+        db.collection('users').doc(user.uid).get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                $('#profileUsername').value = data.displayName || '';
+                $('#profileBio').value = data.bio || '';
+                $('#profileSuggestions').value = data.suggestedMovies || '';
+                if (data.photoURL) avatarImg.src = data.photoURL;
+            } else {
+                $('#profileUsername').value = user.displayName || user.email?.split('@')[0] || '';
+            }
+        });
+    });
+
+    // Close Modal
+    const closeModal = () => modal.classList.remove('active');
+    closeBtn.addEventListener('click', closeModal);
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    // Handle Avatar Upload
+    avatarInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const user = auth.currentUser;
+        if (!user) return;
+
+        // Simple validation
+        if (file.size > 2 * 1024 * 1024) {
+            showToast("Image too large (Max 2MB)");
+            return;
+        }
+
+        const storageRef = storage.ref(`avatars/${user.uid}`);
+        const uploadTask = storageRef.put(file);
+
+        uploadProgress.style.display = 'block';
+
+        uploadTask.on('state_changed', 
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                progressBar.style.width = progress + '%';
+            }, 
+            (error) => {
+                console.error("Upload error:", error);
+                showToast("Upload failed");
+                uploadProgress.style.display = 'none';
+            }, 
+            async () => {
+                const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                avatarImg.src = downloadURL;
+                uploadProgress.style.display = 'none';
+                progressBar.style.width = '0%';
+                
+                // Update Firestore and Auth immediately
+                await db.collection('users').doc(user.uid).set({
+                    photoURL: downloadURL
+                }, { merge: true });
+                
+                await user.updateProfile({ photoURL: downloadURL });
+                
+                // Update UI avatars
+                updateUIAvatars(downloadURL);
+                showToast("Avatar updated!");
+            }
+        );
+    });
+
+    // Handle Form Submit
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const saveBtn = $('#saveProfileBtn');
+        const originalText = saveBtn.textContent;
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+
+        const data = {
+            displayName: $('#profileUsername').value,
+            bio: $('#profileBio').value,
+            suggestedMovies: $('#profileSuggestions').value,
+            updatedAt: serverTimestamp()
+        };
+
+        try {
+            await db.collection('users').doc(user.uid).set(data, { merge: true });
+            await user.updateProfile({ displayName: data.displayName });
+            
+            // Update UI
+            $('#dropdownName').textContent = data.displayName;
+            showToast("Profile saved successfully!");
+            closeModal();
+        } catch (error) {
+            console.error("Save error:", error);
+            showToast("Failed to save profile");
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.textContent = originalText;
+        }
+    });
+}
+
+function loadUserProfile(user) {
+    db.collection('users').doc(user.uid).onSnapshot(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            const name = data.displayName || user.displayName || user.email?.split('@')[0] || 'User';
+            const photo = data.photoURL || user.photoURL;
+
+            $('#dropdownName').textContent = name;
+            $('#dropdownEmail').textContent = user.email || '';
+            
+            if (photo) {
+                updateUIAvatars(photo);
+            } else {
+                const init = name.charAt(0).toUpperCase();
+                $('#userAvatar').textContent = init;
+                $('#dropdownAvatar').textContent = init;
+                $('#userAvatar').style.backgroundImage = 'none';
+                $('#dropdownAvatar').style.backgroundImage = 'none';
+            }
+        } else {
+            // No profile yet, use auth data
+            const name = user.displayName || user.email?.split('@')[0] || 'User';
+            $('#dropdownName').textContent = name;
+            $('#dropdownEmail').textContent = user.email || '';
+            const init = name.charAt(0).toUpperCase();
+            if ($('#userAvatar')) $('#userAvatar').textContent = init;
+            if ($('#dropdownAvatar')) $('#dropdownAvatar').textContent = init;
+        }
+    });
+}
+
+function updateUIAvatars(url) {
+    const avatars = [$('#userAvatar'), $('#dropdownAvatar'), $('#profileAvatarImg')];
+    avatars.forEach(el => {
+        if (!el) return;
+        if (el.tagName === 'IMG') {
+            el.src = url;
+        } else {
+            el.textContent = '';
+            el.style.backgroundImage = `url('${url}')`;
+            el.style.backgroundSize = 'cover';
+            el.style.backgroundPosition = 'center';
+        }
+    });
+}

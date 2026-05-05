@@ -32,6 +32,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="profile.css">
+    <link rel="stylesheet" href="social.css">
+    <link rel="stylesheet" href="chat.css">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     
@@ -120,6 +123,20 @@
                     </button>
                 </div>
 
+                <div class="user-search-container" id="userSearchContainer">
+                    <button class="nav-action-btn" id="openUserSearchBtn" title="Search Users">
+                        <i class="fas fa-users"></i>
+                    </button>
+                    <div class="user-search-dropdown" id="userSearchDropdown">
+                        <div class="user-search-header">
+                            <input type="text" id="userSearchInput" placeholder="Search members...">
+                        </div>
+                        <div class="user-search-results" id="userSearchResults">
+                            <!-- Results will be injected here -->
+                        </div>
+                    </div>
+                </div>
+
                 <!-- User Profile / Login -->
                 <div class="user-menu" id="userMenu">
                     <!-- Logged out state -->
@@ -140,6 +157,9 @@
                                 </div>
                             </div>
                             <div class="dropdown-divider"></div>
+                            <button class="dropdown-item" id="openProfileBtn">
+                                <i class="fas fa-user-circle"></i> My Profile
+                            </button>
                             <button class="dropdown-item" id="logoutBtn">
                                 <i class="fas fa-sign-out-alt"></i> Logout
                             </button>
@@ -515,12 +535,92 @@
         </div>
     </div>
 
+    <!-- Profile Modal -->
+    <div class="profile-modal" id="profileModal">
+        <div class="profile-container">
+            <button class="profile-close" id="closeProfileBtn">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="profile-header">
+                <h3>Edit Profile</h3>
+                <div class="profile-avatar-wrapper">
+                    <img src="https://ui-avatars.com/api/?name=User&background=random" alt="Avatar" class="profile-avatar-img" id="profileAvatarImg">
+                    <label for="avatarInput" class="avatar-upload-btn">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                    <input type="file" id="avatarInput" accept="image/*">
+                </div>
+                <div class="upload-progress" id="uploadProgress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+            <form class="profile-form" id="profileForm">
+                <div class="form-group">
+                    <label for="profileUsername">Username</label>
+                    <input type="text" id="profileUsername" class="profile-input" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="profileBio">Bio</label>
+                    <textarea id="profileBio" class="profile-input profile-textarea" rows="3" placeholder="Tell us about yourself..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="profileSuggestions">Movie Suggestions</label>
+                    <textarea id="profileSuggestions" class="profile-input profile-textarea" rows="2" placeholder="List your favorite movies..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-glow profile-save-btn" id="saveProfileBtn">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <button class="chat-float-btn" id="chatFloatBtn">
+        <i class="fas fa-comment-dots"></i>
+        <span class="chat-badge" id="chatBadge">0</span>
+    </button>
+
+    <!-- Chat Panel -->
+    <div class="chat-panel" id="chatPanel">
+        <div class="chat-header">
+            <button class="chat-back-btn" id="chatBackBtn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h3 id="chatHeaderTitle">Messages</h3>
+            <button class="profile-close" id="closeChatBtn" style="position: static; font-size: 1.2rem;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Conversation List View -->
+        <div class="chat-list" id="chatList">
+            <!-- Conversations will be loaded here -->
+            <div class="chat-item-empty" style="padding: 40px; text-align: center; color: rgba(255,255,255,0.4);">
+                <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.2;"></i>
+                <p>No messages yet.<br>Start a chat from a user's profile!</p>
+            </div>
+        </div>
+
+        <!-- Active Chat View -->
+        <div class="chat-view" id="chatView">
+            <div class="messages-container" id="messagesContainer">
+                <!-- Messages will be loaded here -->
+            </div>
+            <form class="chat-input-area" id="chatInputForm">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." autocomplete="off">
+                <button type="submit" class="chat-send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Firebase SDK (Standard version to support local file loading) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     
     <script src="firebase.js"></script>
     <script src="app.js"></script>
+    <script src="chat.js"></script>
 </body>
 </html>

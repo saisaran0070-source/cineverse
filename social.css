@@ -1,0 +1,133 @@
+/* ============================================
+   CINEVERSE SOCIAL FEATURES (SEARCH & CHAT)
+   ============================================ */
+
+/* USER SEARCH DROPDOWN */
+.user-search-container {
+    position: relative;
+}
+
+.user-search-dropdown {
+    position: absolute;
+    top: calc(100% + 15px);
+    right: 0;
+    width: 320px;
+    background: linear-gradient(135deg, rgba(20, 20, 40, 0.98), rgba(10, 10, 20, 0.99));
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.user-search-dropdown.active {
+    display: flex;
+    transform: translateY(0);
+}
+
+.user-search-header {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#userSearchInput {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 10px 15px;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.user-search-results {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.user-result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.user-result-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.user-result-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-result-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.user-result-name {
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: block;
+}
+
+.user-result-bio {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.user-search-empty {
+    padding: 20px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+/* NAVBAR ICON BUTTON */
+.nav-action-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.nav-action-btn:hover {
+    background: var(--accent-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 60, 172, 0.3);
+}
+
+/* PUBLIC PROFILE VIEW */
+.public-profile-modal .profile-save-btn {
+    display: none; /* Hide save button in read-only mode */
+}
+
+.message-user-btn {
+    display: flex !important;
+    background: var(--accent-secondary) !important;
+    margin-top: 10px;
+}
