@@ -570,10 +570,19 @@ body {
     color: var(--text-primary);
     font-size: 1.1rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.social-btn i, .social-btn span {
+    pointer-events: none; /* Ensure the button gets the click */
+}
+
+.social-btn:active {
+    transform: scale(0.92);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .social-btn:hover {

@@ -289,36 +289,55 @@ $('#signupFormElement').addEventListener('submit', function (e) {
         });
 });
 
-// === Social Login ===
-$$('.social-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        if (btn.classList.contains('phone')) return; // Handled by setupPhoneAuth
-        if (btn.classList.contains('google')) {
-            const originalContent = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>Connecting...</span>';
-            btn.style.opacity = '0.8';
-            btn.style.pointerEvents = 'none';
-            
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    showLoginToast('Welcome! Redirecting...', 'success');
-                    window.location.replace('index.html');
-                })
-                .catch((error) => {
-                    btn.innerHTML = originalContent;
-                    btn.style.opacity = '1';
-                    btn.style.pointerEvents = 'auto';
-                    console.error("Google Auth Error:", error);
-                    if (error.code !== 'auth/popup-closed-by-user') {
-                        showLoginToast(`Google Error: ${error.message}`, 'error');
-                    }
-                });
-        } else {
-            const tempProvider = btn.classList.contains('github') ? 'GitHub' : 'Twitter';
-            showLoginToast(`${tempProvider} login coming soon!`, 'info');
-        }
+// === Social Login (Optimized for Instant Response) ===
+function setupSocialLogin() {
+    const googleBtn = document.querySelector('.social-btn.google');
+    if (!googleBtn) return;
+
+    // Use a single, direct listener for maximum speed
+    googleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Prevent multiple clicks
+        if (googleBtn.classList.contains('is-loading')) return;
+        
+        const originalContent = googleBtn.innerHTML;
+        googleBtn.classList.add('is-loading');
+        googleBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>Connecting...</span>';
+        googleBtn.style.opacity = '0.7';
+        googleBtn.style.pointerEvents = 'none';
+
+        // Use the global provider from firebase.js
+        signInWithPopup(auth, window.provider)
+            .then((result) => {
+                showLoginToast('Welcome back! Redirecting...', 'success');
+                setTimeout(() => window.location.replace('index.html'), 500);
+            })
+            .catch((error) => {
+                // Restore button on error
+                googleBtn.classList.remove('is-loading');
+                googleBtn.innerHTML = originalContent;
+                googleBtn.style.opacity = '1';
+                googleBtn.style.pointerEvents = 'auto';
+                
+                console.error("Auth Error:", error.code);
+                if (error.code !== 'auth/popup-closed-by-user') {
+                    showLoginToast('Google Login failed. Please try again.', 'error');
+                }
+            });
     });
-});
+
+    // Handle other social buttons
+    document.querySelectorAll('.social-btn:not(.google):not(.phone)').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const providerName = btn.classList.contains('github') ? 'GitHub' : 'Twitter';
+            showLoginToast(`${providerName} login coming soon!`, 'info');
+        });
+    });
+}
+
+// Call the new setup
+setupSocialLogin();
 
 // === Forgot Password ===
 $('#forgotPasswordLink').addEventListener('click', (e) => {
